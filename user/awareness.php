@@ -23,7 +23,7 @@ include 'inc/header.php'; // Ensuring the header is included correctly but remai
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            padding: 70px;
+            padding: 150px;
             text-align: center;
         }
 

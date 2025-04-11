@@ -98,21 +98,21 @@ include 'inc/header.php'; // Ensuring the header is included correctly but remai
 <!-- Grid Section for TPC Information -->
 <section class="grid-container">
     <div class="card" id="pollution">
-        <img src="assets/images/pollution.jpg" alt="Pollution">
+    <img src="../assets/images/pollution.jpg" alt="Pollution">
         <div class="overlay">
             <p>🌍 <strong>Causes:</strong> Heavy reliance on fossil fuels, industrial waste dumping, excessive plastic use.</p>
         </div>
     </div>
 
     <div class="card" id="climate">
-        <img src="climate change.jpg" alt="Climate Change">
+        <img src="../assets/images/climate_change.jpg" alt="Climate Change">
         <div class="overlay">
             <p>🌪️ <strong>Causes:</strong> Burning fossil fuels, deforestation, unsustainable farming.</p>
         </div>
     </div>
 
     <div class="card" id="biodiversity">
-        <img src="bioloss.jpg" alt="Biodiversity Loss">
+        <img src="../assets/images/bioloss.jpg" alt="Biodiversity Loss">
         <div class="overlay">
             <p>🦜 <strong>Impact:</strong> Species extinction, reduced climate resilience, ecosystem imbalance.</p>
         </div>

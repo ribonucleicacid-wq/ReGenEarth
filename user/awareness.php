@@ -1,5 +1,4 @@
 <?php
-// Include header (if applicable, but keeping the file self-contained)
 include 'inc/header.php';
 ?>
 

@@ -1,17 +1,20 @@
+<?php
+// Include header (if applicable, but keeping the file self-contained)
+include 'inc/header.php';
+?>
 
-<?php include 'inc/header.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Triple Planetary Crisis | ReGenEarth</title>
+    <title>Triple Planetary Crisis Awareness | ReGenEarth</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header class="hero">
-    <h1>🌍 The Triple Planetary Crisis</h1>
+    <h1>🌍 Triple Planetary Crisis Awareness</h1>
     <p>Act Locally, Think Globally</p>
 </header>
 
@@ -86,7 +89,9 @@
     </ul>
 </section>
 
+<footer class="footer">
+    <p>🌱 Join the movement with ReGenEarth | © 2025</p>
+</footer>
+
 </body>
 </html>
-
-

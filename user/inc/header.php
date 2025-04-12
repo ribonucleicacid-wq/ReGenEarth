@@ -1,3 +1,12 @@
+<?php
+include '../auth/user_only.php';
+
+$user_id = $_SESSION['user_id'] ?? null;
+$username = $_SESSION['username'] ?? null;
+$role = $_SESSION['role'] ?? null;
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -591,7 +600,7 @@
             </button>
 
             <!-- Logo and Brand Name -->
-            <a class="navbar-brand" href="landing_page.php">
+            <a class="navbar-brand" href="home.php">
                 <img src="../uploads/logo.png" class="d-inline-block align-center logo-img" alt=""
                     loading="lazy" />ReGenEarth
             </a>
@@ -652,7 +661,9 @@
                             data-toggle="dropdown">
                             <span><img src="../uploads/members/sample profile.png"
                                     class="img-circle elevation-2 user-img" alt="User Image"></span>
-                            <span class="ml-3">Juan Dela Cruz</span>
+                            <span class="ml-3">
+                                <?php echo htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?>
+                            </span>
                             <span class="sr-only"></span>
                         </button>
                         <div class="dropdown-menu" role="menu">
@@ -702,7 +713,7 @@
                     if (!!process_ajax)
                         process_ajax.abort();
                     process_ajax = $.ajax({
-                        url: "search_user.php", // Add the correct URL to handle the search
+                        url: "search.php",
                         method: 'POST',
                         data: { search: kw },
                         dataType: 'json',

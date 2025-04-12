@@ -1,5 +1,8 @@
-<?php include 'inc/header.php'; ?>
-
+<?php
+session_start();
+include 'inc/header.php';
+include '../auth/user_only.php';
+?>
 <!-- Main Content -->
 <div class="container mt-4">
     <!-- Filter Bar -->
@@ -860,5 +863,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
-<?php include 'inc/footer.php'; ?>

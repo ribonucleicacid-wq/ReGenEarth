@@ -160,8 +160,12 @@ include '../auth/user_only.php';
       <textarea id="title" name="title" placeholder="Add your title here..." required></textarea>
 
       <label for="content">Caption</label>
+<<<<<<< HEAD
       <textarea id="content" name="content" placeholder="Post your innovations and inspire your community..."
         required></textarea>
+=======
+      <textarea id="content" name="content" placeholder="Post your innovations and inspire your community..." required></textarea>
+>>>>>>> db7aee0230b4dd28b915b4406b4df634092c7bfc
 
       <label for="topic">Target TPC:</label>
       <div class="choices-TPC">
@@ -197,7 +201,11 @@ include '../auth/user_only.php';
           reader.onload = function (e) {
             const img = document.createElement('img');
             img.src = e.target.result;
+<<<<<<< HEAD
             img.style.width = "100px";
+=======
+            img.style.width = "100px"; 
+>>>>>>> db7aee0230b4dd28b915b4406b4df634092c7bfc
             img.style.margin = "5px";
             previewContainer.appendChild(img);
           };
@@ -206,7 +214,11 @@ include '../auth/user_only.php';
       });
     });
 
+<<<<<<< HEAD
     document.addEventListener("DOMContentLoaded", function () {
+=======
+    document.addEventListener("DOMContentLoaded", function() {
+>>>>>>> db7aee0230b4dd28b915b4406b4df634092c7bfc
       const body = document.body;
       if (localStorage.getItem('mode') === 'light') {
         body.classList.add('light-mode');
@@ -214,5 +226,9 @@ include '../auth/user_only.php';
     });
   </script>
 </body>
+<<<<<<< HEAD
 
 </html>
+=======
+</html>
+>>>>>>> db7aee0230b4dd28b915b4406b4df634092c7bfc

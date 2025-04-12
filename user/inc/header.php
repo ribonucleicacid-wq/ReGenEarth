@@ -203,6 +203,387 @@ $role = $_SESSION['role'] ?? null;
             justify-content: space-between;
             align-items: center;
         }
+
+        /* Notification Styles */
+        .notifications-nav {
+            position: relative;
+            margin: 0 1.5rem;
+        }
+
+        .notifications-nav .nav-link {
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .notifications-nav .fa-bell {
+            font-size: 1.2rem;
+            color: var(--silver);
+            transition: transform 0.2s ease;
+        }
+
+        .notifications-nav .nav-link:hover .fa-bell {
+            transform: scale(1.1);
+            color: var(--moonstone);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            padding: 0.25em 0.4em;
+            font-size: 0.75em;
+            line-height: 1;
+            border-radius: 50%;
+            background-color: #dc3545;
+            color: white;
+            min-width: 1em;
+            text-align: center;
+            transform: scale(0.9);
+        }
+
+        .d-flex.align-items-center {
+            gap: 0.5rem;
+        }
+
+        .btn-group.nav-link {
+            margin-left: 0.5rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .notifications-nav {
+                margin: 0.5rem 0;
+            }
+            
+            .navbar-nav {
+                gap: 0.5rem;
+            }
+            
+            .d-flex.align-items-center {
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* Adjust dropdown styling for better spacing */
+        .notification-dropdown {
+            width: 350px;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .notifications-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .dropdown-footer {
+            padding: 8px;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .notification-item-preview {
+            padding: 12px 12px 12px 40px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .notification-item-preview:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        .notification-item-preview.unread {
+            background-color: rgba(87, 175, 195, 0.1);
+        }
+
+        .notification-item-preview.unread::before {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--moonstone);
+            border-radius: 50%;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            animation: pulse 2s infinite;
+            animation-delay: -1s;
+            box-shadow: 0 0 0 0 rgba(87, 175, 195, 0.7);
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translateY(-50%) scale(1);
+                box-shadow: 0 0 0 0 rgba(87, 175, 195, 0.7);
+            }
+            70% {
+                transform: translateY(-50%) scale(1.3);
+                box-shadow: 0 0 0 8px rgba(87, 175, 195, 0);
+            }
+            100% {
+                transform: translateY(-50%) scale(1);
+                box-shadow: 0 0 0 0 rgba(87, 175, 195, 0);
+            }
+        }
+
+        .notification-item-preview .d-flex {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .notification-item-preview .notification-icon {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(87, 175, 195, 0.1);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .notification-item-preview img {
+            border: 2px solid var(--moonstone);
+            flex-shrink: 0;
+        }
+
+        .notification-item-preview .notification-content {
+            flex: 1;
+            min-width: 200px;
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .notification-item-preview .notification-content div {
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .notification-item-preview .notification-time {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .notification-item-preview strong {
+            color: var(--moonstone);
+        }
+
+        /* Notification Icon Animations */
+        .notification-icon {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+            position: relative;
+            margin-right: 10px;
+        }
+
+        /* Base hover effect for all icons */
+        .notification-icon:hover {
+            transform: scale(1.1);
+        }
+
+        /* Unread Indicator */
+        .unread-indicator {
+            width: 12px;
+            height: 12px;
+            background-color: var(--moonstone);
+            border-radius: 50%;
+            display: inline-block;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 0 rgba(87, 175, 195, 0.7);
+            z-index: 1;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(87, 175, 195, 0.7);
+            }
+            70% {
+                transform: scale(1.2);
+                box-shadow: 0 0 0 6px rgba(87, 175, 195, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(87, 175, 195, 0);
+            }
+        }
+
+        /* Like Icon Animation */
+        .notification-icon.like:hover i {
+            animation: likeBeat 2s ease-in-out infinite;
+        }
+
+        @keyframes likeBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Comment Icon Animation */
+        .notification-icon.comment:hover i {
+            animation: commentBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes commentBounce {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* Follow Icon Animation */
+        .notification-icon.follow:hover i {
+            animation: followPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes followPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        /* Badge Icon Animation */
+        .notification-icon.badge:hover i {
+            animation: badgeShine 2s ease-in-out infinite;
+        }
+
+        @keyframes badgeShine {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(15deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        /* Mention Icon Animation */
+        .notification-icon.mention:hover i {
+            animation: mentionSpin 2s ease-in-out infinite;
+        }
+
+        @keyframes mentionSpin {
+            0% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Action Icon Animation */
+        .notification-icon.action:hover i {
+            animation: actionWave 2s ease-in-out infinite;
+        }
+
+        @keyframes actionWave {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        /* Notification Icon Colors with better contrast and glow effect */
+        .notification-icon.like { 
+            color: #4CAF50; 
+            background-color: rgba(76, 175, 80, 0.1);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+        }
+        .notification-icon.comment { 
+            color: #2196F3; 
+            background-color: rgba(33, 150, 243, 0.1);
+            box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+        }
+        .notification-icon.follow { 
+            color: #9C27B0; 
+            background-color: rgba(156, 39, 176, 0.1);
+            box-shadow: 0 0 10px rgba(156, 39, 176, 0.2);
+        }
+        .notification-icon.badge { 
+            color: #FFC107; 
+            background-color: rgba(255, 193, 7, 0.1);
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
+        }
+        .notification-icon.mention { 
+            color: #E91E63; 
+            background-color: rgba(233, 30, 99, 0.1);
+            box-shadow: 0 0 10px rgba(233, 30, 99, 0.2);
+        }
+        .notification-icon.action { 
+            color: #00BCD4; 
+            background-color: rgba(0, 188, 212, 0.1);
+            box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
+        }
+
+        /* Add glow effect on hover */
+        .notification-icon:hover {
+            box-shadow: 0 0 10px rgba(87, 175, 195, 0.3);
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 576px) {
+            .notification-item-preview {
+                padding: 12px 12px 12px 35px;
+            }
+            
+            .notification-item-preview.unread::before {
+                width: 8px;
+                height: 8px;
+                left: 12px;
+            }
+        }
+
+        /* Search Form Container */
+        #search-form-folder {
+            margin-right: 2rem;  /* Add margin to create space between search and nav items */
+        }
+
+        /* Adjust navbar spacing */
+        .navbar-nav {
+            gap: 1rem;
+            align-items: center;
+            margin-left: 1rem;  /* Add margin to create space after search bar */
+        }
+
+        /* Style for Post nav item */
+        .nav-link .fa-plus-square {
+            font-size: 1.1rem;
+            margin-right: 4px;
+        }
+
+        .nav-link {
+            padding: 0.5rem 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .mark-all-read-btn {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            background-color: var(--moonstone);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .mark-all-read-btn:hover {
+            background-color: #489fb5;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(87, 175, 195, 0.3);
+        }
     </style>
 </head>
 
@@ -240,15 +621,39 @@ $role = $_SESSION['role'] ?? null;
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                     <li class="nav-item"><a class="nav-link" href="./">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="post.php"><i
-                                class="far fa-plus-square mr-2"></i>Post</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center" href="post.php">
+                            <i class="far fa-plus-square me-1"></i>
+                            <span>Post</span>
+                        </a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" href="follows.php">Follows</a></li>
-                    <li class="nav-item"><a class="nav-link" href="notifications.php">Notifications</a></li>
                     <li class="nav-item"><a class="nav-link" href="awareness.php">Awareness</a></li>
                 </ul>
 
                 <!-- User Dropdown -->
                 <div class="d-flex align-items-center">
+                    <!-- Notifications -->
+                    <div class="nav-item dropdown notifications-nav">
+                        <?php 
+                        // Get current page filename
+                        $current_page = basename($_SERVER['PHP_SELF']);
+                        // Only show dropdown functionality if not on notifications page
+                        if($current_page !== 'notifications.php'): 
+                        ?>
+                        <a class="nav-link" href="notifications.php">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge badge-danger notification-badge">1</span>
+                        </a>
+                        <?php else: ?>
+                        <!-- On notifications page, bell icon links directly to notifications page -->
+                        <a class="nav-link" href="notifications.php">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge badge-danger notification-badge">1</span>
+                        </a>
+                        <?php endif; ?>
+                    </div>
+
                     <!-- User Dropdown + Mode Toggle -->
                     <div class="btn-group nav-link text-reset">
                         <button type="button"
@@ -376,6 +781,27 @@ $role = $_SESSION['role'] ?? null;
             });
         });
 
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to update notification badge count
+            function updateNotificationBadge() {
+                const unreadCount = localStorage.getItem('unreadNotifications') || 0;
+                const badge = document.querySelector('.notification-badge');
+                if (badge) {
+                    badge.textContent = unreadCount;
+                    badge.style.display = unreadCount > 0 ? 'block' : 'none';
+                }
+            }
+
+            // Initial count update
+            updateNotificationBadge();
+
+            // Listen for storage events to sync badge count
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'unreadNotifications') {
+                    updateNotificationBadge();
+                }
+            });
+        });
     </script>
 </body>
 

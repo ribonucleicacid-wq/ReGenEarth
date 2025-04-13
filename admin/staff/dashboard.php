@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "inc/navigation.php";
-include '../auth/admin_only.php';
+include '../../auth/staff_only.php';
 ?>
 
 <!DOCTYPE html>
@@ -11,7 +11,7 @@ include '../auth/admin_only.php';
     <meta charset="UTF-8">
     <title>Admin Dashboard - ReGenEarth</title> <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
-    <link rel="shortcut icon" href="uploads/logo.png" type="image/png" />
+    <link rel="shortcut icon" href="../../uploads/logo.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <style>

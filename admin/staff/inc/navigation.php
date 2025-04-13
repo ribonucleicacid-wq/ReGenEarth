@@ -1,5 +1,5 @@
 <?php
-include '../auth/admin_only.php';
+include '../../auth/staff_only.php';
 
 $user_id = $_SESSION['user_id'] ?? null;
 $username = $_SESSION['username'] ?? null;
@@ -14,7 +14,7 @@ $role = $_SESSION['role'] ?? null;
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - ReGenEarth</title>
-    <link rel="shortcut icon" href="../uploads/logo.png" type="image/png" />
+    <link rel="shortcut icon" href="../../uploads/logo.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 
@@ -360,7 +360,7 @@ $role = $_SESSION['role'] ?? null;
     <!-- Sidebar -->
     <nav class="sidebar">
         <a class="navbar-brand" href="dashboard.php">
-            <img src="../uploads/logo.png" class="d-inline-block align-center logo-img" alt=""
+            <img src="../../uploads/logo.png" class="d-inline-block align-center logo-img" alt=""
                 loading="lazy" />ReGenEarth
         </a>
         <div class="menu-content">
@@ -384,10 +384,6 @@ $role = $_SESSION['role'] ?? null;
                     <a href="tips_management.php"><i class="fas fa-leaf"></i><span class="text">List of
                             Tips</span></a>
                 </li>
-                <li class="item">
-                    <a href="admin_management.php"><i class="fas fa-user-shield"></i><span class="text">List of
-                            Admins</span></a>
-                </li>
             </ul>
         </div>
     </nav>
@@ -405,7 +401,7 @@ $role = $_SESSION['role'] ?? null;
                 <button
                     class="btn-right btn-rounded badge badge-light dropdown-toggle text-reset d-flex align-items-center gap-2"
                     type="button" id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img src="../uploads/members/sample profile.png" class="user-img" alt="User Image">
+                    <img src="../../uploads/members/sample profile.png" class="user-img" alt="User Image">
                     <span class="d-none d-sm-inline">
                         <?php echo htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?>
                     </span>
@@ -471,7 +467,7 @@ $role = $_SESSION['role'] ?? null;
         function confirmLogout() {
             const confirmed = confirm("Are you sure you want to log out?");
             if (confirmed) {
-                window.location.href = '../config.php?action=logout';
+                window.location.href = '../../config.php?action=logout';
             }
         }
     </script>

@@ -1,9 +1,7 @@
 <?php
 // auth/staff_only.php
-session_start();
-
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'staff') {
-    header("Location: ../landing_page.php");
+    header("Location: ../../landing_page.php");
     exit();
 }
 
@@ -14,7 +12,7 @@ if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) >
     // Session expired, log out the user
     session_unset();
     session_destroy();
-    header("Location: ../landing_page.php");
+    header("Location: ../../landing_page.php");
     exit();
 }
 

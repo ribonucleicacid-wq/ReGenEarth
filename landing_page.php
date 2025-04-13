@@ -338,7 +338,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 for (let i = 0; i < line.length; i++) {
                     lineDiv.textContent += line[i];
-                    animPlayTypeSound();
                     await animSleep(delay);
                 }
                 await animSleep(400);

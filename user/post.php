@@ -160,12 +160,8 @@ include '../auth/user_only.php';
       <textarea id="title" name="title" placeholder="Add your title here..." required></textarea>
 
       <label for="content">Caption</label>
-<<<<<<< HEAD
       <textarea id="content" name="content" placeholder="Post your innovations and inspire your community..."
         required></textarea>
-=======
-      <textarea id="content" name="content" placeholder="Post your innovations and inspire your community..." required></textarea>
->>>>>>> db7aee0230b4dd28b915b4406b4df634092c7bfc
 
       <label for="topic">Target TPC:</label>
       <div class="choices-TPC">

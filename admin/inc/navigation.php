@@ -45,7 +45,7 @@ $role = $_SESSION['role'] ?? null;
             font-family: "Poppins", sans-serif;
         }
 
-        body {
+        .navigation {
             background-color: var(--rich-black);
             color: var(--silver);
         }
@@ -59,7 +59,7 @@ $role = $_SESSION['role'] ?? null;
             padding: 15px;
             z-index: 99;
             transition: all 0.3s;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .sidebar.close {
@@ -67,7 +67,7 @@ $role = $_SESSION['role'] ?? null;
         }
 
         body.light-mode .sidebar {
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
         }
 
 
@@ -134,7 +134,8 @@ $role = $_SESSION['role'] ?? null;
 
         /* Navbar */
         .navbar {
-            position: fixed;
+            position: sticky;
+            top: 0;
             left: 260px;
             width: calc(100% - 260px);
             height: 70px;
@@ -144,9 +145,11 @@ $role = $_SESSION['role'] ?? null;
             padding: 0 20px;
             background-color: var(--prussian-blue);
             color: var(--silver);
-            z-index: 100;
+            z-index: 101;
             transition: all 0.5s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
         }
+
 
         .sidebar.close~.navbar {
             left: 0;
@@ -353,7 +356,7 @@ $role = $_SESSION['role'] ?? null;
     </style>
 </head>
 
-<body>
+<body class="navigation">
     <!-- Sidebar -->
     <nav class="sidebar">
         <a class="navbar-brand" href="dashboard.php">
@@ -428,32 +431,21 @@ $role = $_SESSION['role'] ?? null;
     <script>
         // Sidebar toggle
         function toggleSidebar(el) {
-            document.querySelector(".sidebar").classList.toggle("close");
+            const sidebar = document.querySelector(".sidebar");
+            const main = document.querySelector(".main");
+            sidebar.classList.toggle("close");
             el.classList.toggle("open");
+
+            // Adjust padding/margins dynamically if needed
+            if (sidebar.classList.contains("close")) {
+                main.style.left = "0px";
+                main.style.padding = "60px";
+                main.style.width = "100%";
+            } else {
+                main.style.left = "260px";
+                main.style.width = "calc(100% - 260px)";
+            }
         }
-
-        // Submenu toggle
-        const menu = document.querySelector(".menu-content");
-        const menuItems = document.querySelectorAll(".submenu-item");
-        const subMenuTitles = document.querySelectorAll(".submenu .menu-title");
-
-        menuItems.forEach((item, index) => {
-            item.addEventListener("click", () => {
-                menu.classList.add("submenu-active");
-                item.classList.add("show-submenu");
-                menuItems.forEach((item2, index2) => {
-                    if (index !== index2) {
-                        item2.classList.remove("show-submenu");
-                    }
-                });
-            });
-        });
-
-        subMenuTitles.forEach((title) => {
-            title.addEventListener("click", () => {
-                menu.classList.remove("submenu-active");
-            });
-        });
 
         // Light/Dark mode
         document.addEventListener("DOMContentLoaded", function () {

@@ -75,6 +75,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error_message = "No account found with this email.";
             }
         }
+        if (isset($_POST['remember_me'])) {
+            // Set cookies for 30 days
+            setcookie("remember_email", $email, time() + (86400 * 30), "/");
+            setcookie("remember_password", $password, time() + (86400 * 30), "/");
+        } else {
+            // Clear cookies if unchecked
+            setcookie("remember_email", "", time() - 3600, "/");
+            setcookie("remember_password", "", time() - 3600, "/");
+        }
+
     }
 
     // ========== SIGNUP ==========
@@ -202,17 +212,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     <?php endif; ?>
                     <div class="input_box">
-                        <input type="email" name="email" placeholder="Enter your email" required />
+                        <input type="email" name="email" placeholder="Enter your email" required
+                            value="<?php echo isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email'] : ''; ?>" />
                         <i class="uil uil-envelope-alt email"></i>
                     </div>
                     <div class="input_box">
-                        <input type="password" name="password" placeholder="Enter your password" required />
+                        <input type="password" name="password" placeholder="Enter your password" required
+                            value="<?php echo isset($_COOKIE['remember_password']) ? $_COOKIE['remember_password'] : ''; ?>" />
                         <i class="uil uil-lock password"></i>
                         <i class="uil uil-eye-slash pw_hide"></i>
                     </div>
                     <div class=" option_field">
                         <span class="checkbox">
-                            <input type="checkbox" id="check" />
+                            <input type="checkbox" id="check" name="remember_me" <?php echo isset($_COOKIE['remember_email']) ? 'checked' : ''; ?> />
                             <label for="check">Remember me</label>
                         </span>
                         <a href="#" class="forgot_pw">Forgot password?</a>

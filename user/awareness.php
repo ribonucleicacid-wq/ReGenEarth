@@ -1,11 +1,12 @@
-<?php 
+<?php
 session_start();
-include 'inc/header.php'; 
+include 'inc/header.php';
 include '../auth/user_only.php';
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,6 @@ include '../auth/user_only.php';
             --taupe-gray: #999A9C;
             --rich-black: #0B1A26;
             --brunswick-green: #234F38;
-            
             font-family: 'Inter', 'Arial', sans-serif;
             color: var(--silver);
             line-height: 1.6;
@@ -218,12 +218,17 @@ include '../auth/user_only.php';
         }
     </style>
 </head>
+
 <body>
     <div class="tpc-content">
         <div class="container">
             <section class="hero-section">
                 <h1>The Triple Planetary Crisis</h1>
-                <p class="hero-text">Our planet faces three interconnected challenges that threaten our environment, health, and future. Understanding these crises is the first step toward creating positive change.</p>
+                <p class="hero-text">Our planet faces three interconnected challenges that threaten
+                    our environment,
+                    health, and future. Understanding these crises is the first step toward creating positive
+                    change.
+                </p>
             </section>
 
             <div class="crisis-grid">
@@ -231,7 +236,8 @@ include '../auth/user_only.php';
                     <img src="../assets/images/pollution.jpg" alt="Environmental Pollution" class="card-image">
                     <div class="card-content">
                         <h3 class="card-title">Pollution Crisis</h3>
-                        <p class="card-text">Pollution affects air, water, and soil quality, posing serious risks to both human health and ecosystems.</p>
+                        <p class="card-text">Pollution affects air, water, and soil quality, posing serious
+                            risks to both human health and ecosystems.</p>
                         <ul class="info-list">
                             <li>Industrial emissions and waste</li>
                             <li>Plastic pollution in oceans</li>
@@ -245,7 +251,9 @@ include '../auth/user_only.php';
                     <img src="../assets/images/climate_change.jpg" alt="Climate Change" class="card-image">
                     <div class="card-content">
                         <h3 class="card-title">Climate Crisis</h3>
-                        <p class="card-text">Global climate change leads to rising temperatures, extreme weather events, and disrupted ecosystems.</p>
+                        <p class="card-text">Global climate change leads to rising temperatures,
+                            extreme weather events,
+                            and disrupted ecosystems.</p>
                         <ul class="info-list">
                             <li>Rising sea levels</li>
                             <li>Extreme weather patterns</li>
@@ -259,7 +267,8 @@ include '../auth/user_only.php';
                     <img src="../assets/images/bioloss.jpg" alt="Biodiversity Loss" class="card-image">
                     <div class="card-content">
                         <h3 class="card-title">Biodiversity Crisis</h3>
-                        <p class="card-text">The rapid loss of species and habitats threatens the delicate balance of Earth's ecosystems.</p>
+                        <p class="card-text">The rapid loss of species and habitats threatens the delicate
+                            balance of Earth's ecosystems.</p>
                         <ul class="info-list">
                             <li>Species extinction</li>
                             <li>Habitat destruction</li>
@@ -276,7 +285,8 @@ include '../auth/user_only.php';
                     <div class="tip-item">
                         <div class="tip-icon">🌱</div>
                         <h4 class="tip-title">Reduce Carbon Footprint</h4>
-                        <p class="tip-text">Choose sustainable transportation and energy-efficient appliances.</p>
+                        <p class="tip-text">Choose sustainable transportation and energy-efficient appliances.
+                        </p>
                     </div>
 
                     <div class="tip-item">
@@ -288,11 +298,13 @@ include '../auth/user_only.php';
                     <div class="tip-item">
                         <div class="tip-icon">🌳</div>
                         <h4 class="tip-title">Support Conservation</h4>
-                        <p class="tip-text">Participate in local conservation efforts and wildlife protection.</p>
+                        <p class="tip-text">Participate in local conservation efforts and wildlife protection.
+                        </p>
                     </div>
                 </div>
             </section>
         </div>
     </div>
 </body>
+
 </html>

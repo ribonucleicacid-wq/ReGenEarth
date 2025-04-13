@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 include 'inc/header.php';
 include '../auth/user_only.php';
 ?>
@@ -132,24 +133,24 @@ include '../auth/user_only.php';
       [
         'title' => 'Saving the Earth',
         'content' => 'Let\'s reduce our carbon footprint!',
-        'images' => ['img1.jpg', 'img2.jpg'],
+        'images' => ['https://unsplash.com/photos/black-printing-machine-printing-on-black-and-green-pad-L_N7BaNLC5Y', 'assets/images/cover.png'],
         'topic' => 'Climate Change'
       ],
       [
         'title' => 'Pollution Problem',
         'content' => 'Plastic is everywhere...',
-        'images' => ['img3.jpg'],
+        'images' => ['https://unsplash.com/photos/black-printing-machine-printing-on-black-and-green-pad-L_N7BaNLC5Y'],
         'topic' => 'Pollution'
       ]
     ];
 
-    foreach ($posts as $post) :
-    ?>
+    foreach ($posts as $post):
+      ?>
       <div class="post-card">
         <div class="post-header"><?= htmlspecialchars($post['title']) ?></div>
         <div class="post-content"><?= htmlspecialchars($post['content']) ?></div>
         <div class="post-images">
-          <?php foreach ($post['images'] as $image) : ?>
+          <?php foreach ($post['images'] as $image): ?>
             <img src="uploads/<?= htmlspecialchars($image) ?>" alt="Post image">
           <?php endforeach; ?>
         </div>
@@ -160,7 +161,8 @@ include '../auth/user_only.php';
 
         <div class="comment-box">
           <textarea id="comment-textarea-<?= $post['title'] ?>" placeholder="Write a comment..."></textarea>
-          <button class="icon-btn" onclick="addComment('<?= $post['title'] ?>')"><i class="fas fa-paper-plane"></i> Send</button>
+          <button class="icon-btn" onclick="addComment('<?= $post['title'] ?>')"><i class="fas fa-paper-plane"></i>
+            Send</button>
         </div>
 
         <div class="comments-list" id="comments-list-<?= $post['title'] ?>">

@@ -1,6 +1,5 @@
 # Custom exclusions
 settings.json
-private/
 header.php
 text.php
 test.php

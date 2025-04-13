@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "inc/navigation.php";
-include '../auth/admin_only.php';
+include '../../auth/staff_only.php';
 ?>
 
 <!DOCTYPE html>
@@ -9,9 +9,9 @@ include '../auth/admin_only.php';
 
 <head>
     <meta charset="UTF-8">
-    <title>Post Management - ReGenEarth</title>
+    <title>Tips Management - ReGenEarth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
-    <link rel="shortcut icon" href="uploads/logo.png" type="image/png" />
+    <link rel="shortcut icon" href="../../uploads/logo.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 
@@ -129,29 +129,29 @@ include '../auth/admin_only.php';
 
 <body class="dashboard">
     <div class="main">
-        <h2 class="mb-4 mt-5">Posts Management</h2>
+        <h2 class="mb-4 mt-5">Tips Management</h2>
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Title</th>
-                        <th>Author</th>
-                        <th>Date</th>
+                        <th>Tip</th>
+                        <th>Category</th>
+                        <th>Date Added</th>
                         <th style="width: 160px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>101</td>
-                        <td>How to Recycle</td>
-                        <td>JohnDoe</td>
-                        <td>2024-08-15</td>
+                        <td>501</td>
+                        <td>Use reusable bags</td>
+                        <td>Environment</td>
+                        <td>2024-10-01</td>
                         <td>
-                            <button class="btn btn-edit btn-custom" onclick="editPost(this)">
+                            <button class="btn btn-edit btn-custom" onclick="editTip(this)">
                                 <i class="fas fa-edit"></i> Edit
                             </button>
-                            <button class="btn btn-delete btn-custom" onclick="deletePost(this)">
+                            <button class="btn btn-delete btn-custom" onclick="deleteTip(this)">
                                 <i class="fas fa-trash"></i> Delete
                             </button>
                         </td>
@@ -159,9 +159,9 @@ include '../auth/admin_only.php';
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">
-            <button class="btn btn-add btn-custom" onclick="addPost()">
-                <i class="fas fa-plus"></i> Add Post
+        <div class="mt-3 mb-5">
+            <button class="btn btn-add btn-custom" onclick="addTip()">
+                <i class="fas fa-lightbulb"></i> Add Tip
             </button>
         </div>
     </div>

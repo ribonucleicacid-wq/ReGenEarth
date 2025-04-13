@@ -92,12 +92,13 @@ a {
 
 /* Home */
 .home {
-  position: relative;
-  height: 100vh;
-  width: 100%;
-  background-image: url("../images/cover.png");
+  position: absolute;
+  height: 0vh;
+  width: 0%;
+  /* background-image: url("../images/cover.png");
   background-size: cover;
-  background-position: center;
+  background-position: center; */
+ 
 }
 .home::before {
   content: "";
@@ -375,4 +376,3 @@ a {
   margin-right: 10px;
   color: #155724;  /* Match the success text color */
 }
-

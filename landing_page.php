@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 require_once 'src/db_connection.php';
 require_once 'src/emailFunctions.php';
@@ -8,41 +9,31 @@ $conn = $db->getConnection();
 $error_message = '';
 $success_message = '';
 
-// Function to validate email format
+// ========== Validation and Sanitize Functions ==========
 function validateEmail($email)
 {
     return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
-// Function to validate password strength (at least 8 characters, 1 uppercase, 1 number)
 function validatePasswordStrength($password)
 {
-    if (strlen($password) < 8) {
-        return false;
-    }
-    if (!preg_match('/[A-Z]/', $password)) { // At least one uppercase letter
-        return false;
-    }
-    if (!preg_match('/\d/', $password)) { // At least one digit
-        return false;
-    }
-    return true;
+    return strlen($password) >= 8 && preg_match('/[A-Z]/', $password) && preg_match('/\d/', $password);
 }
 
-// Function to validate if passwords match
 function validatePasswordsMatch($password, $confirm_password)
 {
     return $password === $confirm_password;
 }
 
-// Function to sanitize inputs (to prevent XSS)
 function sanitizeInput($input)
 {
     return htmlspecialchars(trim($input));
 }
 
+// ========== Main Form Handler ==========
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Login
+
+    // ========== LOGIN ==========
     if (isset($_POST['login'])) {
         $email = sanitizeInput($_POST['email']);
         $password = sanitizeInput($_POST['password']);
@@ -50,53 +41,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!validateEmail($email)) {
             $error_message = "Invalid email format.";
         } else {
-            $stmt = $conn->prepare("CALL LoginAccount(?, ?)");
+            $stmt = $conn->prepare("CALL LoginAccount(?)");
             $stmt->bindParam(1, $email);
-            $stmt->bindParam(2, $password);
             $stmt->execute();
-
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            $message = $result['message'];
 
-            if ($message === "Login successful.") {
-                header("Location: user/home.php");
-                exit();
+            if ($result) {
+                $hashedPassword = $result['password_hash'];
+                $isVerified = $result['is_verified'];
+
+                if (!$isVerified) {
+                    $error_message = "Account not verified. Please check your email.";
+                } elseif (!password_verify($password, $hashedPassword)) {
+                    $error_message = "Incorrect password.";
+                } else {
+                    $_SESSION['user_id'] = $result['user_id'];
+                    $_SESSION['username'] = $result['username'];
+                    $_SESSION['role'] = $result['role'];
+
+                    switch ($result['role']) {
+                        case 'admin':
+                            header("Location: admin/dashboard.php");
+                            break;
+                        case 'staff':
+                            header("Location: admin/staff/dashboard.php");
+                            break;
+                        default:
+                            header("Location: user/home.php");
+                    }
+                    exit();
+                }
             } else {
-                $error_message = $message;
+                $error_message = "No account found with this email.";
             }
         }
+        if (isset($_POST['remember_me'])) {
+            // Set cookies for 30 days
+            setcookie("remember_email", $email, time() + (86400 * 30), "/");
+            setcookie("remember_password", $password, time() + (86400 * 30), "/");
+        } else {
+            // Clear cookies if unchecked
+            setcookie("remember_email", "", time() - 3600, "/");
+            setcookie("remember_password", "", time() - 3600, "/");
+        }
+
     }
 
-    // Signup
+    // ========== SIGNUP ==========
     if (isset($_POST['signup'])) {
         $username = sanitizeInput($_POST['username']);
         $email = sanitizeInput($_POST['email']);
         $password = sanitizeInput($_POST['password']);
         $confirm_password = sanitizeInput($_POST['confirm_password']);
 
-        // Check if passwords match
         if (!validatePasswordsMatch($password, $confirm_password)) {
             $error_message = "Passwords do not match.";
-        }
-        // Check if the password is strong
-        elseif (!validatePasswordStrength($password)) {
-            $error_message = "Password must be at least 8 characters long, contain at least one uppercase letter and one number.";
-        }
-        // Check if email format is valid
-        elseif (!validateEmail($email)) {
+        } elseif (!validatePasswordStrength($password)) {
+            $error_message = "Password must be at least 8 characters long, with one uppercase letter and one number.";
+        } elseif (!validateEmail($email)) {
             $error_message = "Invalid email format.";
         } else {
-            // Proceed to register the user
             $password_hash = password_hash($password, PASSWORD_BCRYPT);
-            $verification_code = rand(100000, 999999); // 6-digit code
+            $verification_code = rand(100000, 999999);
 
             $_SESSION['verification_email'] = $email;
             $_SESSION['verification_code'] = $verification_code;
 
-            $stmt = $conn->prepare("CALL RegisterAccount(?, ?, ?)");
+            $stmt = $conn->prepare("CALL RegisterAccount(?, ?, ?, ?)");
             $stmt->bindParam(1, $username);
             $stmt->bindParam(2, $email);
             $stmt->bindParam(3, $password_hash);
+            $stmt->bindParam(4, $verification_code);
             $stmt->execute();
 
             sendVerificationEmail($email, $verification_code);
@@ -104,27 +119,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Handle Login, Signup, Verification...
-        if (isset($_POST['verify_code'])) {
-            $entered_code = sanitizeInput($_POST['verification_code']);
-            if ($entered_code == $_SESSION['verification_code']) {
-                $success_message = "Account verified successfully. You can now login.";
+    // ========== VERIFY CODE ==========
+    if (isset($_POST['verify_code'])) {
+        $entered_code = sanitizeInput($_POST['verification_code']);
+        $email = $_SESSION['verification_email'] ?? '';
+
+        if ($email && $entered_code) {
+            $stmt = $conn->prepare("CALL VerifyAccount(?, ?)");
+            $stmt->bindParam(1, $email);
+            $stmt->bindParam(2, $entered_code);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (isset($result['message']) && $result['message'] === 'Account successfully verified.') {
+                $success_message = $result['message'];
                 unset($_SESSION['verification_code'], $_SESSION['verification_email']);
-                $_SESSION['is_verified'] = true; // Set session variable to indicate success
             } else {
-                $error_message = "Invalid verification code.";
-                $_SESSION['is_verified'] = false; // Ensure form stays open for retry
+                $error_message = $result['message'];
             }
+        } else {
+            $error_message = "Verification code or session expired.";
         }
     }
 
-    // Resend Code
+    // ========== RESEND CODE ==========
     if (isset($_POST['resend_code'])) {
         $email = $_SESSION['verification_email'] ?? null;
         if ($email) {
             $verification_code = rand(100000, 999999);
             $_SESSION['verification_code'] = $verification_code;
+
+            // Update code in DB
+            $stmt = $conn->prepare("CALL UpdateVerificationCode(?, ?)");
+            $stmt->bindParam(1, $email);
+            $stmt->bindParam(2, $verification_code);
+            $stmt->execute();
+
+
             sendVerificationEmail($email, $verification_code);
             $success_message = "A new verification code has been sent.";
         } else {
@@ -143,6 +174,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <?php include 'inc/header.php'; ?>
+
+    <section class="anim-bg-section">
+        <div class="anim-wrapper">
+            <div class="anim-re-text">Re</div>
+            <div class="anim-content">
+                <ol>
+                    <li><span>GenEarth</span></li>
+                    <li><span>duce</span></li>
+                    <li><span>use</span></li>
+                    <li><span>cycle</span></li>
+                    <li><span>plenish</span></li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="anim-wrapper-2">
+            <div id="animTyping" class="anim-typewriter"></div>
+        </div>
+        <div class="anim-button">
+            <button class="learn-more">Learn More</button>
+        </div>
+    </section>
+
     <!-- Home -->
     <section class="home">
         <div class="form_container">
@@ -150,23 +204,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Login Form -->
             <div class="form login_form">
-                <form action="user/home.php" method="POST">
+                <form action="landing_page.php" method="POST">
                     <h2>Login</h2>
                     <?php if (isset($error_message) && !empty($error_message)): ?>
-                        <div class="error-message"><?php echo $error_message; ?></div>
+                        <div class="error-message">
+                            <?php echo $error_message; ?>
+                        </div>
                     <?php endif; ?>
                     <div class="input_box">
-                        <input type="email" name="email" placeholder="Enter your email" required />
+                        <input type="email" name="email" placeholder="Enter your email" required
+                            value="<?php echo isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email'] : ''; ?>" />
                         <i class="uil uil-envelope-alt email"></i>
                     </div>
                     <div class="input_box">
-                        <input type="password" name="password" placeholder="Enter your password" required />
+                        <input type="password" name="password" placeholder="Enter your password" required
+                            value="<?php echo isset($_COOKIE['remember_password']) ? $_COOKIE['remember_password'] : ''; ?>" />
                         <i class="uil uil-lock password"></i>
                         <i class="uil uil-eye-slash pw_hide"></i>
                     </div>
-                    <div class="option_field">
+                    <div class=" option_field">
                         <span class="checkbox">
-                            <input type="checkbox" id="check" />
+                            <input type="checkbox" id="check" name="remember_me" <?php echo isset($_COOKIE['remember_email']) ? 'checked' : ''; ?> />
                             <label for="check">Remember me</label>
                         </span>
                         <a href="#" class="forgot_pw">Forgot password?</a>
@@ -182,7 +240,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <form action="landing_page.php" method="POST">
                         <h2 id="signupTitle">Sign Up</h2>
                         <?php if (isset($error_message) && !empty($error_message)): ?>
-                            <div class="error-message"><?php echo $error_message; ?></div>
+                            <div class="error-message">
+                                <?php echo $error_message; ?>
+                            </div>
                         <?php endif; ?>
                         <div class="progress-container">
                             <div class="progress-bar" id="progressBar">
@@ -191,8 +251,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <h3>Fill in all fields.</h3>
                         <div class="input_box">
-                            <i class="uil uil-user"></i>
-                            <input type="text" name="username" placeholder="Enter your username" required />
+                            <i class="uil uil-user"></i> <input type="text" name="username"
+                                placeholder="Enter your username" required />
 
                         </div>
                         <div class="input_box">
@@ -220,10 +280,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Verification Form -->
             <?php if (isset($_SESSION['verification_code']) && !isset($_SESSION['is_verified'])): ?>
                 <div class="form verification_form">
-                    <form action="user/home.php" method="POST">
+                    <form action="landing_page.php" method="POST">
                         <h2 id="signupTitle">Signup</h2>
                         <!-- Error and Success Messages -->
                         <?php if (isset($error_message) && !empty($error_message)): ?>
+
                             <div class="message error-message">
                                 <i class="uil uil-times-circle"></i> <!-- Error icon -->
                                 <?php echo $error_message; ?>
@@ -255,7 +316,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </section>
 
     <script src="assets/js/script.js"></script>
+    <script>
+        const animTypingArea = document.getElementById('animTyping');
+
+        const animMessages1 = ["for the new", "Generation", "of Earth"];
+        const animMessages2 = ["Acting Locally,", "Thinking Globally"];
+
+        function animSleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function animTypeLines(lines, delay = 80) {
+            animTypingArea.innerHTML = "";
+            const cursor = document.createElement("span");
+            cursor.className = "cursor";
+            animTypingArea.appendChild(cursor);
+
+            for (let line of lines) {
+                const lineDiv = document.createElement("div");
+                animTypingArea.insertBefore(lineDiv, cursor);
+
+                for (let i = 0; i < line.length; i++) {
+                    lineDiv.textContent += line[i];
+                    animPlayTypeSound();
+                    await animSleep(delay);
+                }
+                await animSleep(400);
+            }
+
+            await animSleep(2000);
+        }
+
+        async function animLoop() {
+            while (true) {
+                await animTypeLines(animMessages1);
+                await animSleep(1000);
+                await animTypeLines(animMessages2);
+                await animSleep(3000);
+            }
+        }
+
+        animLoop();
+    </script>
+
 
 </body>
 
 </html>
+
+<?php ob_end_flush(); ?>

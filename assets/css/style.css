@@ -95,9 +95,6 @@ a {
   position: absolute;
   height: 0vh;
   width: 0%;
-  /* background-image: url("../images/cover.png");
-  background-size: cover;
-  background-position: center; */
  
 }
 .home::before {
@@ -375,4 +372,37 @@ a {
 .success-message i {
   margin-right: 10px;
   color: #155724;  /* Match the success text color */
+}
+
+.anim-wrapper{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #fff;
+  padding-bottom: 400px;
+  padding-top: 0%;
+  margin-bottom: 10rem;
+}
+
+.anim-wrapper-2{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #fff;
+  padding-top: 90px;
+  position: fixed;
+}
+
+.anim-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  color: #fff;
+  padding-top: 240px;
+}
+.learn-more {
+  cursor: pointer;
 }

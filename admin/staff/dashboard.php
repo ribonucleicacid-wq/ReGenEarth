@@ -1,7 +1,29 @@
 <?php
 session_start();
+$_SESSION['just_logged_in'] = true;
+
+require_once '../../src/db_connection.php';
 include "inc/navigation.php";
 include '../../auth/staff_only.php';
+
+$database = new Database();
+$conn = $database->getConnection();
+
+$userCount = 0;
+$adminCount = 0;
+
+try {
+    $stmt = $conn->prepare("CALL CountUsers()");
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($result) {
+        $userCount = $result['user_count'];
+        $adminCount = $result['admin_count'];
+    }
+    $stmt->closeCursor();
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
 ?>
 
 <!DOCTYPE html>
@@ -9,11 +31,13 @@ include '../../auth/staff_only.php';
 
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard - ReGenEarth</title> <!-- Google Font -->
+    <title>Admin Dashboard - ReGenEarth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
-    <link rel="shortcut icon" href="../../uploads/logo.png" type="image/png" />
+    <link rel="shortcut icon" href="uploads/logo.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
             --moonstone: #57AFC3;
@@ -23,14 +47,6 @@ include '../../auth/staff_only.php';
             --rich-black: #0B1A26;
         }
 
-        .light-mode {
-            --moonstone: #489fb5;
-            --prussian-blue: #e9ecef;
-            --silver: #212529;
-            --taupe-gray: #6c757d;
-            --rich-black: #ffffff;
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -38,14 +54,39 @@ include '../../auth/staff_only.php';
             font-family: "Poppins", sans-serif;
         }
 
-        .dashboard-container {
-            padding: 2rem;
+        .main {
+            position: relative;
+            background-color: var(--prussian-blue);
+            display: flex;
+            flex-direction: column;
+            padding: 10px 20px;
+            padding-top: 70px;
+            height: 100%;
         }
 
-        .dashboard-header {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
+        .dashboard {
+            background-color: var(--rich-black);
+            flex-grow: 1;
+            overflow: auto;
+        }
+
+        .dashboard-header-sticky {
+            position: sticky;
+            top: 0;
+            background: var(--prussian-blue);
+            z-index: 100;
+        }
+
+        .dashboard-header-sticky h2 {
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--silver);
+            margin-bottom: 0;
+        }
+
+        .container-fluid {
+            padding-top: 10px;
+            padding-bottom: 10px;
         }
 
         .card {
@@ -62,105 +103,73 @@ include '../../auth/staff_only.php';
             transform: translateY(-4px);
         }
 
-        .card .card-body {
+        .card-body {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
         }
 
-        .card .icon-container {
+        .icon-container {
             font-size: 1.5rem;
             margin-left: auto;
         }
 
-        .card .count {
-            font-size: 2rem;
-            font-weight: bold;
+        .chart-container {
+            margin-top: 40px;
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 16px;
         }
 
-        .card .label {
-            font-size: 1rem;
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
         }
 
-        .climate {
-            background: #4caf50;
+        .text-white h5,
+        .text-white h2 {
+            color: #fff !important;
         }
 
-        .pollution {
-            background: #2196f3;
-        }
-
-        .biodiversity {
-            background: #ff9800;
-        }
-
-        .users {
-            background: #9c27b0;
-        }
-
-        .admins {
-            background: #f44336;
-        }
-
-        .main {
-            background-color: var(--prussian-blue);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .dashboard {
-            background-color: var(--rich-black);
-            flex-grow: 100%;
-            overflow: hidden;
-        }
-
-        .main {
-            padding: 10px 20px;
-            height: 89vh;
-            background-color: var(--prussian-blue);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .container-fluid {
-            padding-top: 10px !important;
-            padding-bottom: 10px !important;
-        }
-
-        #dashboard-cards h2 {
-            margin-bottom: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .mb-4 {
-            font-size: 25px;
-            font-weight: 600;
+        .greet {
+            font-size: 24px;
+            font-weight: 500;
             color: var(--silver);
+            margin-bottom: 20px;
+            text-align: justify;
+            position: relative;
+            opacity: 1;
+            transition: opacity 1s ease-out;
         }
 
-        .mb-5 {
-            font-size: 30px;
-            font-weight: 800;
+        .greet.hidden {
+            opacity: 0;
+        }
+
+        .posts-title {
+            font-size: 15px;
+            font-weight: 400;
             color: var(--silver);
-            align-items: flex-start;
-            flex-direction: column;
-            display: flex;
+            margin-left: 5px;
         }
 
-        hr {
-            border: 1px solid var(--silver);
+        .card-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--silver);
         }
     </style>
 </head>
 
 <body class="dashboard">
     <div class="main">
-        <h2 class="mb-5">Management Dashboard | ReGenEarth</h2>
-        <div class="container-fluid p-4" id="dashboard-cards">
-            <h2 class="mb-4">Welcome back, Admin!</h2>
+        <div>
+            <h2>Management Dashboard | ReGenEarth</h2>
+        </div>
 
+        <div class="container-fluid" id="dashboard-cards">
+            <hr>
             <!-- Top Section: Users and Admins -->
             <div class="row g-4 mb-4">
                 <div class="col-md-6">
@@ -168,7 +177,9 @@ include '../../auth/staff_only.php';
                         <div class="card-body">
                             <div>
                                 <h5 class="card-title">Users</h5>
-                                <h2 id="userCount">0</h2>
+                                <h2 id="userCount">
+                                    <?php echo $userCount; ?>
+                                </h2>
                             </div>
                             <div class="icon-container">
                                 <i class="fas fa-users fa-2x"></i>
@@ -182,7 +193,9 @@ include '../../auth/staff_only.php';
                         <div class="card-body">
                             <div>
                                 <h5 class="card-title">Admins</h5>
-                                <h2 id="adminCount">0</h2>
+                                <h2 id="adminCount">
+                                    <?php echo $adminCount; ?>
+                                </h2>
                             </div>
                             <div class="icon-container">
                                 <i class="fas fa-user-shield fa-2x"></i>
@@ -193,6 +206,13 @@ include '../../auth/staff_only.php';
             </div>
 
             <!-- Bottom Section: Posts by Category -->
+            <hr>
+            <div class="row">
+                <div class="col-12 text-left">
+                    <h5 class="posts-title mb-3">Innovative Posts by Category</h5>
+                </div>
+            </div>
+
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="card text-white bg-success shadow p-3">
@@ -216,7 +236,7 @@ include '../../auth/staff_only.php';
                                 <h2 id="pollutionCount">0</h2>
                             </div>
                             <div class="icon-container">
-                                <i class="fas fa-smog fa-2x"></i>
+                                <i class="fas fa-trash-alt fa-2x"></i>
                             </div>
                         </div>
                     </div>
@@ -230,18 +250,30 @@ include '../../auth/staff_only.php';
                                 <h2 id="biodiversityCount">0</h2>
                             </div>
                             <div class="icon-container">
-                                <i class="fas fa-leaf fa-2x"></i>
+                                <i class="fas fa-tree fa-2x"></i>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <hr>
+            <!-- Chart Section -->
+            <div class="chart-container mt-5">
+                <h4 style="color:#fff;">Monthly User Engagement Trend</h4>
+                <canvas id="lineChart"></canvas>
+            </div>
+            <div class="d-flex justify-content-center mb-3">
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <button class="btn btn-outline-light active" onclick="updateChart('monthly')">Monthly</button>
+                    <button class="btn btn-outline-light" onclick="updateChart('yearly')">Yearly</button>
+                    <button class="btn btn-outline-light" onclick="updateChart('weekly')">Weekly</button>
+                </div>
+            </div>
         </div>
     </div>
 
-
     <script>
-        // Simulated data (you would fetch from your backend via AJAX or embed via PHP)
+        // Sample values
         const dashboardData = {
             users: 1240,
             admins: 12,
@@ -252,14 +284,82 @@ include '../../auth/staff_only.php';
             }
         };
 
-        // Populate numbers
-        document.getElementById("userCount").textContent = dashboardData.users;
-        document.getElementById("adminCount").textContent = dashboardData.admins;
+        // Fill numbers
         document.getElementById("climateCount").textContent = dashboardData.posts.climate;
         document.getElementById("pollutionCount").textContent = dashboardData.posts.pollution;
         document.getElementById("biodiversityCount").textContent = dashboardData.posts.biodiversity;
-    </script>
 
+        // Sample chart data
+        let lineChart;
+
+        const chartDataSets = {
+            monthly: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                data: [50, 70, 65, 120, 150, 130, 180, 200, 220, 120, 200, 309]
+            },
+            yearly: {
+                labels: ["2020", "2021", "2022", "2023", "2024"],
+                data: [500, 820, 940, 1200, 1340]
+            },
+            weekly: {
+                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                data: [10, 12, 15, 9, 20, 25, 30]
+            }
+        };
+
+        function renderChart(type) {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            const { labels, data } = chartDataSets[type];
+
+            if (lineChart) lineChart.destroy(); // destroy previous instance
+
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `User Engagements (${type.charAt(0).toUpperCase() + type.slice(1)})`,
+                        data: data,
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderColor: '#4caf50',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointBackgroundColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#fff'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#fff' }
+                        },
+                        y: {
+                            ticks: { color: '#fff' },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart(type) {
+            renderChart(type);
+            // Highlight the selected button
+            document.querySelectorAll('.btn-group-toggle .btn').forEach(btn => btn.classList.remove('active'));
+            const clickedBtn = Array.from(document.querySelectorAll('.btn-group-toggle .btn')).find(btn => btn.textContent.toLowerCase() === type);
+            if (clickedBtn) clickedBtn.classList.add('active');
+        }
+
+        // Initial render
+        renderChart('monthly');
+    </script>
 </body>
 
 </html>

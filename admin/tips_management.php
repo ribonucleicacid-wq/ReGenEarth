@@ -2,6 +2,8 @@
 session_start();
 include "inc/navigation.php";
 include '../auth/admin_only.php';
+
+$_SESSION['just_logged_in'] = false;
 ?>
 
 <!DOCTYPE html>
@@ -113,6 +115,7 @@ include '../auth/admin_only.php';
         }
 
         .main {
+            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;

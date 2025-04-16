@@ -78,4 +78,54 @@ function sendResetPasswordEmail($userEmail, $resetCode)
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }
+function sendNewUserCredentialsEmail($userEmail, $username, $defaultPassword)
+{
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'regenearth.nexus@gmail.com';
+        $mail->Password = 'ybkh fmlb defv mglm';
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        $mail->setFrom('regenearth.nexus@gmail.com', 'ReGenEarth');
+        $mail->addAddress($userEmail);
+
+        $mail->addEmbeddedImage('assets/images/cover.png', 'banner_cid');
+        $mail->isHTML(true);
+        $mail->Subject = 'Welcome to ReGenEarth – Your Account Details';
+        $mail->Body = '
+            <html>
+                <body>
+                    <img src="cid:banner_cid" alt="Banner" style="width:100%; max-width:600px;">
+                    <p>
+                        Hi ' . htmlspecialchars($username) . ',<br><br>
+
+                        Your account has been successfully created by the admin.<br><br>
+
+                        You can now log in with the following credentials:<br><br>
+
+                        <b>Email:</b> ' . htmlspecialchars($userEmail) . '<br>
+                        <b>Temporary Password:</b> ' . $defaultPassword . '<br><br>
+
+                        Please log in and update your password at your earliest convenience.<br><br>
+
+                        Welcome to ReGenEarth!<br><br>
+
+                        Sincerely,<br>
+                        The ReGenEarth Team
+                    </p>
+                </body>
+            </html>
+        ';
+
+        $mail->send();
+    } catch (Exception $e) {
+        error_log("Failed to send new user email: {$mail->ErrorInfo}");
+    }
+}
+
 ?>

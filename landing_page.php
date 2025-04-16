@@ -175,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <?php include 'inc/header.php'; ?>
 
-    <section class="anim-bg-section">
+    <section class="anim-bg-section gap-90px">
         <div class="anim-wrapper">
             <div class="anim-re-text">Re</div>
             <div class="anim-content">
@@ -193,8 +193,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div id="animTyping" class="anim-typewriter"></div>
         </div>
         <div class="anim-button">
-            <button class="learn-more">Learn More</button>
+            <button class="learn-more" onclick="window.location.href='about_us.php';">Learn More</button>
         </div>
+
     </section>
 
     <!-- Home -->

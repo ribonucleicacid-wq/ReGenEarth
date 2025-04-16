@@ -2,6 +2,8 @@
 session_start();
 include "inc/navigation.php";
 include '../../auth/staff_only.php';
+
+$_SESSION['just_logged_in'] = false;
 ?>
 
 <!DOCTYPE html>
@@ -11,7 +13,7 @@ include '../../auth/staff_only.php';
     <meta charset="UTF-8">
     <title>Post Management - ReGenEarth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
-    <link rel="shortcut icon" href="../../uploads/logo.png" type="image/png" />
+    <link rel="shortcut icon" href="uploads/logo.png" type="image/png" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 
@@ -113,6 +115,7 @@ include '../../auth/staff_only.php';
         }
 
         .main {
+            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;

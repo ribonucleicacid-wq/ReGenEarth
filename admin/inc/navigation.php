@@ -4,6 +4,12 @@ include '../auth/admin_only.php';
 $user_id = $_SESSION['user_id'] ?? null;
 $username = $_SESSION['username'] ?? null;
 $role = $_SESSION['role'] ?? null;
+
+$show_greeting = false;
+if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) {
+    $show_greeting = true;
+    unset($_SESSION['just_logged_in']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -55,7 +61,7 @@ $role = $_SESSION['role'] ?? null;
             position: fixed;
             height: 100%;
             width: 260px;
-            background: var(--prussian-blue);
+            background: var(--rich-black);
             padding: 15px;
             z-index: 99;
             transition: all 0.3s;
@@ -134,7 +140,8 @@ $role = $_SESSION['role'] ?? null;
 
         /* Navbar */
         .navbar {
-            position: sticky;
+            position: -webkit-sticky;
+            z-index: 1001;
             top: 0;
             left: 260px;
             width: calc(100% - 260px);
@@ -145,26 +152,71 @@ $role = $_SESSION['role'] ?? null;
             padding: 0 20px;
             background-color: var(--prussian-blue);
             color: var(--silver);
-            z-index: 101;
             transition: all 0.5s ease;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
         }
 
+        .navbar-2 {
+            position: sticky;
+            z-index: 1001;
+            top: 0;
+            left: 260px;
+            width: calc(100% - 260px);
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background-color: var(--prussian-blue);
+            color: var(--silver);
+            transition: all 0.5s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
+        }
 
-        .sidebar.close~.navbar {
+        .navbar-2 {
+            transition: left 0.3s ease, width 0.3s ease;
+        }
+
+        .sidebar.close~.navbar-2 {
             left: 0;
             width: 100%;
         }
 
-        .navbar #sidebar-close {
+        .navbar-2 #sidebar-close {
             font-size: 24px;
             cursor: pointer;
         }
 
-        .navbar .right-items {
+        .navbar-2 .right-items {
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .left-items {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .greet {
+            margin-left: 10px;
+            font-size: 18px;
+            color: var(--silver);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .greet {
+            transition: opacity 0.5s ease-in-out;
+            opacity: 1;
+        }
+
+        .greet.hidden {
+            opacity: 0;
+            visibility: hidden;
         }
 
         .logo-img {
@@ -185,14 +237,19 @@ $role = $_SESSION['role'] ?? null;
         }
 
         .name {
-            font-weight: 700;
-            font-size: 20px;
-            color: var(--silver);
+            font-weight: 500;
+            font-size: 16px;
+            color: var(--rich-black);
         }
 
         .btn-rounded {
             padding: 3px 10px;
             font-size: 0.9rem;
+        }
+
+        .dropdown {
+            background-color: var(--prussian-blue);
+            border-color: var(--moonstone);
         }
 
         .dropdown-menu {
@@ -211,7 +268,6 @@ $role = $_SESSION['role'] ?? null;
 
         /* Main */
         .main {
-            position: relative;
             left: 260px;
             width: calc(100% - 260px);
             height: 100vh;
@@ -333,9 +389,17 @@ $role = $_SESSION['role'] ?? null;
 
         .btn-right {
             background-color: var(--moonstone);
-            padding: 5px;
+            color: black;
+            border-color: var(--moonstone);
+            padding-top: 2px;
+            padding-bottom: 2px;
+            padding-right: 2px;
+            padding-left: 0px;
+            border-radius: 5px;
+            height: 25px;
             transition: all 0.3s ease;
         }
+
 
         .navbar-brand {
             font-size: 24px;
@@ -353,6 +417,19 @@ $role = $_SESSION['role'] ?? null;
         .bar:hover {
             color: var(--moonstone) !important;
         }
+
+        .item.active a {
+            background-color: var(--moonstone);
+            font-weight: bold;
+            color: white !important;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: var(--taupe-gray);
+            margin: 10px 0;
+        }
     </style>
 </head>
 
@@ -364,27 +441,29 @@ $role = $_SESSION['role'] ?? null;
                 loading="lazy" />ReGenEarth
         </a>
         <div class="menu-content">
+
             <ul class="menu-items margin-right-10px">
-                <li class="item">
+                <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
+                <li class=" item <?php echo $currentPage == 'dashboard.php' ? 'active' : ''; ?>">
                     <a href="dashboard.php"><i class="fas fa-tachometer-alt"></i><span class="text">Dashboard</span></a>
                 </li>
                 <hr>
                 <div class="menu-title">Main</div>
-                <li class="item">
+                <li class="item <?php echo $currentPage == 'user_management.php' ? 'active' : ''; ?>">
                     <a href="user_management.php"><i class="fas fa-users"></i><span class="text">List of
                             Users</span></a>
                 </li>
-                <li class="item">
+                <li class="item <?php echo $currentPage == 'post_management.php' ? 'active' : ''; ?>">
                     <a href="post_management.php"><i class="fas fa-list"></i><span class="text">List of
                             Posts</span></a>
                 </li>
                 <hr>
                 <div class="menu-title">Management</div>
-                <li class="item">
+                <li class="item <?php echo $currentPage == 'tips_management.php' ? 'active' : ''; ?>">
                     <a href="tips_management.php"><i class="fas fa-leaf"></i><span class="text">List of
                             Tips</span></a>
                 </li>
-                <li class="item">
+                <li class="item <?php echo $currentPage == 'admin_management.php' ? 'active' : ''; ?>">
                     <a href="admin_management.php"><i class="fas fa-user-shield"></i><span class="text">List of
                             Admins</span></a>
                 </li>
@@ -393,20 +472,23 @@ $role = $_SESSION['role'] ?? null;
     </nav>
 
     <!-- Top Navbar -->
-    <nav class="navbar">
-        <div class="hamburger" id="sidebar-toggle" onclick="toggleSidebar(this)">
-            <div class="bar bar1"></div>
-            <div class="bar bar2"></div>
-            <div class="bar bar3"></div>
+    <nav class="navbar-2">
+        <div class="left-items d-flex align-items-center gap-3">
+            <div class="hamburger" id="sidebar-toggle" onclick="toggleSidebar(this)">
+                <div class="bar bar1"></div>
+                <div class="bar bar2"></div>
+                <div class="bar bar3"></div>
+            </div>
+            <h4 class="greet m-0 <?php echo !$show_greeting ? 'hidden' : ''; ?>" id="greetMessage">Welcome back, Admin!
+            </h4>
         </div>
         <div class="right-items">
             <!-- User Dropdown -->
             <div class="dropdown">
-                <button
-                    class="btn-right btn-rounded badge badge-light dropdown-toggle text-reset d-flex align-items-center gap-2"
-                    type="button" id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button class="btn-right btn-rounded dropdown-toggle d-flex align-items-center gap-2" type="button"
+                    id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img src="../uploads/members/sample profile.png" class="user-img" alt="User Image">
-                    <span class="d-none d-sm-inline">
+                    <span class="name d-none d-sm-inline">
                         <?php echo htmlspecialchars($_SESSION['username'] ?? 'Guest'); ?>
                     </span>
                 </button>
@@ -429,6 +511,15 @@ $role = $_SESSION['role'] ?? null;
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script>
+        window.onload = function () {
+            setTimeout(function () {
+                const greet = document.getElementById("greetMessage");
+                if (greet) {
+                    greet.classList.add("hidden");
+                }
+            }, 3000);
+        };
+
         // Sidebar toggle
         function toggleSidebar(el) {
             const sidebar = document.querySelector(".sidebar");
@@ -436,14 +527,14 @@ $role = $_SESSION['role'] ?? null;
             sidebar.classList.toggle("close");
             el.classList.toggle("open");
 
-            // Adjust padding/margins dynamically if needed
             if (sidebar.classList.contains("close")) {
                 main.style.left = "0px";
-                main.style.padding = "60px";
                 main.style.width = "100%";
+                main.style.padding = "80px";
             } else {
                 main.style.left = "260px";
                 main.style.width = "calc(100% - 260px)";
+                main.style.padding = "";
             }
         }
 

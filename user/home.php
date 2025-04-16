@@ -9,7 +9,7 @@
   <style>
     .feed-container {
       max-width: 800px;
-      margin: 20px auto;
+      margin: 0 auto;
       padding: 20px;
     }
 
@@ -34,17 +34,17 @@
     }
 
     .post-images {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
       margin-bottom: 15px;
     }
-
+    
     .post-images img {
-      max-width: 150px;
-      border-radius: 10px;
+      width: 100%;
+      height: auto;
+      max-height: 400px;
       object-fit: cover;
-      border: 1px solid var(--taupe-gray);
+      border-radius: 8px;
+      display: block;
+      margin-bottom: 10px;
     }
 
     .post-footer {
@@ -63,10 +63,20 @@
       gap: 6px;
       transition: color 0.3s;
       background-color: transparent;
+      outline: none; 
     }
 
     .icon-btn:hover {
       color: var(--moonstone);
+    }
+
+    .icon-btn:focus {
+      outline: none; 
+    }
+
+    .icon-btn:active {
+      outline: none; 
+      border: none; 
     }
 
     .comment-box {
@@ -74,6 +84,14 @@
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+
+    .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--taupe-gray);
     }
 
     .comment-box textarea {
@@ -110,31 +128,64 @@
     }
 
     .comment-item {
-      background-color: var(--prussian-blue);
-      padding: 10px;
+      background-color: var(--rich-black);
+      padding: 12px;
       border-radius: 8px;
       color: var(--silver);
+      display: flex;
+      gap: 10px;
+    }
+
+    .comment-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid var(--taupe-gray);
+    }
+
+    .comment-content-wrapper {
+      flex: 1;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .comment-user {
+      font-weight: 600;
+      color: var(--moonstone);
+    }
+
+    .comment-time {
+      font-size: 12px;
+      color: var(--taupe-gray);
+    }
+
+    .comment-content {
+      word-break: break-word;
     }
   </style>
 
 </head>
 
-<body>
-
-  <div class="feed-container">
+<div class="feed-container">
     <?php
-    // Eme lang na post data
+    // Sample post data
     $posts = [
       [
         'title' => 'Saving the Earth',
         'content' => 'Let\'s reduce our carbon footprint!',
-        'images' => 'deforestation.jpg', 'img2.jpg',
+        'images' => ['deforestation.jpg'],
         'topic' => 'Climate Change'
       ],
       [
         'title' => 'Pollution Problem',
         'content' => 'Plastic is everywhere...',
-        //'images' => user\pollution.jpg,
+        'images' => ['pollution.jpg'],
         'topic' => 'Pollution'
       ]
     ];
@@ -145,7 +196,7 @@
         <div class="post-header"><?= htmlspecialchars($post['title']) ?></div>
         <div class="post-content"><?= htmlspecialchars($post['content']) ?></div>
         <div class="post-images">
-          <?php foreach ($images as $image) : ?>
+          <?php foreach ($post['images'] as $image) : ?>
             <img src="uploads/<?= htmlspecialchars($image) ?>">
           <?php endforeach; ?>
         </div>
@@ -155,27 +206,71 @@
         </div>
 
         <div class="comment-box">
+          <img src="uploads/profile.jpg" alt="Your Profile" class="user-avatar">
           <textarea id="comment-textarea-<?= $post['title'] ?>" placeholder="Write a comment..."></textarea>
           <button class="icon-btn" onclick="addComment('<?= $post['title'] ?>')"><i class="fas fa-paper-plane"></i></button>
         </div>
 
         <div class="comments-list" id="comments-list-<?= $post['title'] ?>">
-
+          
         </div>
       </div>
     <?php endforeach; ?>
   </div>
 
   <script>
+    function formatTime(date) {
+      // Get current time
+      const now = new Date();
+      const diff = now - date;
+      
+      // Less than a minute
+      if (diff < 60000) {
+        return 'Just now';
+      }
+      
+      // Less than an hour
+      if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000);
+        return `${minutes}m ago`;
+      }
+      
+      // Less than a day
+      if (diff < 86400000) {
+        const hours = Math.floor(diff / 3600000);
+        return `${hours}h ago`;
+      }
+      
+      // Format date
+      const day = date.getDate();
+      const month = date.toLocaleString('default', { month: 'short' });
+      return `${month} ${day}`;
+    }
+
     function addComment(postTitle) {
       const commentText = document.getElementById(`comment-textarea-${postTitle}`).value;
 
       if (commentText.trim()) {
         const commentsList = document.getElementById(`comments-list-${postTitle}`);
-
+        
+        // Sample user data
+        const currentUser = "Sam Miller"; 
+        const commentDate = new Date();
+        const profilePic = "uploads/profile.jpg"; 
+        
         const newComment = document.createElement('div');
         newComment.classList.add('comment-item');
-        newComment.innerText = commentText;
+        
+        newComment.innerHTML = `
+          <img src="${profilePic}" alt="${currentUser}" class="comment-avatar">
+          <div class="comment-content-wrapper">
+            <div class="comment-header">
+              <span class="comment-user">${currentUser}</span>
+              <span class="comment-time">${formatTime(commentDate)}</span>
+            </div>
+            <div class="comment-content">${commentText}</div>
+          </div>
+        `;
 
         commentsList.appendChild(newComment);
 

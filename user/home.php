@@ -22,6 +22,51 @@
       transition: 0.3s;
     }
 
+    /*CSS for the author/inventor section*/
+    .post-author {
+      display: flex;
+      align-items: flex-start;
+      padding: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      position: relative;
+    }
+
+    .author-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      margin-top: 8px;
+    }
+
+    .author-info {
+      flex: 1;
+    }
+
+    .author-name {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .post-time {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      font-size: 12px;
+    }
+
+    .post-topic {
+      display: inline-block;
+      background-color: var(--moonstone);
+      color: white;
+      font-size: 12px;
+      padding: 3px 5px;
+      border-radius: 12px;
+      margin-top: 4px;
+      width: fit-content;
+    }
+
     .post-header {
       font-size: 16px;
       font-weight: 600;
@@ -36,7 +81,7 @@
     .post-images {
       margin-bottom: 15px;
     }
-    
+
     .post-images img {
       width: 100%;
       height: auto;
@@ -63,7 +108,7 @@
       gap: 6px;
       transition: color 0.3s;
       background-color: transparent;
-      outline: none; 
+      outline: none;
     }
 
     .icon-btn:hover {
@@ -71,12 +116,12 @@
     }
 
     .icon-btn:focus {
-      outline: none; 
+      outline: none;
     }
 
     .icon-btn:active {
-      outline: none; 
-      border: none; 
+      outline: none;
+      border: none;
     }
 
     .comment-box {
@@ -86,6 +131,7 @@
       gap: 10px;
     }
 
+    /*CSS for commentor section*/
     .user-avatar {
       width: 34px;
       height: 34px;
@@ -173,95 +219,113 @@
 </head>
 
 <div class="feed-container">
-    <?php
-    // Sample post data
-    $posts = [
-      [
-        'title' => 'Saving the Earth',
-        'content' => 'Let\'s reduce our carbon footprint!',
-        'images' => ['deforestation.jpg'],
-        'topic' => 'Climate Change'
-      ],
-      [
-        'title' => 'Pollution Problem',
-        'content' => 'Plastic is everywhere...',
-        'images' => ['pollution.jpg'],
-        'topic' => 'Pollution'
-      ]
-    ];
+  <?php
+  // Sample post data
+  $posts = [
+    [
+      'author' => 'Jane Smith',
+      'author_image' => 'jane_profile.jpg',
+      'post_time' => '2025-04-20 15:30:00',
+      'title' => 'Saving the Earth',
+      'content' => 'Let\'s reduce our carbon footprint!',
+      'images' => ['deforestation.jpg'],
+      'topic' => 'Climate Change'
+    ],
+    [
+      'author' => 'Mark Johnson',
+      'author_image' => 'mark_profile.jpg',
+      'post_time' => '2025-04-21 09:15:00',
+      'title' => 'Pollution Problem',
+      'content' => 'Plastic is everywhere...',
+      'images' => ['pollution.jpg'],
+      'topic' => 'Pollution'
+    ]
+  ];
 
-    foreach ($posts as $post) :
-    ?>
-      <div class="post-card">
-        <div class="post-header"><?= htmlspecialchars($post['title']) ?></div>
-        <div class="post-content"><?= htmlspecialchars($post['content']) ?></div>
-        <div class="post-images">
-          <?php foreach ($post['images'] as $image) : ?>
-            <img src="uploads/<?= htmlspecialchars($image) ?>">
-          <?php endforeach; ?>
-        </div>
-        <div class="post-footer">
-          <button class="icon-btn"><i class="fa-regular fa-heart"></i> Like</button>
-          <button class="icon-btn"><i class="fa-regular fa-comment"></i>Comment</button>
-        </div>
-
-        <div class="comment-box">
-          <img src="uploads/profile.jpg" alt="Your Profile" class="user-avatar">
-          <textarea id="comment-textarea-<?= $post['title'] ?>" placeholder="Write a comment..."></textarea>
-          <button class="icon-btn" onclick="addComment('<?= $post['title'] ?>')"><i class="fas fa-paper-plane"></i></button>
-        </div>
-
-        <div class="comments-list" id="comments-list-<?= $post['title'] ?>">
-          
+  foreach ($posts as $post) :
+  ?>
+    <div class="post-card">
+      <!--Author section at the top of the post -->
+      <div class="post-author">
+        <img src="uploads/<?= htmlspecialchars($post['author_image']) ?>" alt="<?= htmlspecialchars($post['author']) ?>" class="author-avatar">
+        <div class="author-info">
+          <div class="author-name"><?= htmlspecialchars($post['author']) ?></div>
+          <div class="post-topic"><?= htmlspecialchars($post['topic']) ?></div>
+          <div class="post-time"><?= date('M d \a\t g:i a', strtotime($post['post_time'])) ?></div>
         </div>
       </div>
-    <?php endforeach; ?>
-  </div>
+      <!--Content of the post -->
+      <div class="post-header"><?= htmlspecialchars($post['title']) ?></div>
+      <div class="post-content"><?= htmlspecialchars($post['content']) ?></div>
+      <div class="post-images">
+        <?php foreach ($post['images'] as $image) : ?>
+          <img src="uploads/<?= htmlspecialchars($image) ?>">
+        <?php endforeach; ?>
+      </div>
+      <div class="post-footer">
+        <button class="icon-btn"><i class="fa-regular fa-heart"></i> Like</button>
+        <button class="icon-btn"><i class="fa-regular fa-comment"></i>Comment</button>
+      </div>
+      <!--Comment section of the post -->
+      <div class="comment-box">
+        <img src="uploads/profile.jpg" alt="Your Profile" class="user-avatar">
+        <textarea id="comment-textarea-<?= $post['title'] ?>" placeholder="Write a comment..."></textarea>
+        <button class="icon-btn" onclick="addComment('<?= $post['title'] ?>')"><i class="fas fa-paper-plane"></i></button>
+      </div>
 
-  <script>
-    function formatTime(date) {
-      // Get current time
-      const now = new Date();
-      const diff = now - date;
-      
-      // Less than a minute
-      if (diff < 60000) {
-        return 'Just now';
-      }
-      
-      // Less than an hour
-      if (diff < 3600000) {
-        const minutes = Math.floor(diff / 60000);
-        return `${minutes}m ago`;
-      }
-      
-      // Less than a day
-      if (diff < 86400000) {
-        const hours = Math.floor(diff / 3600000);
-        return `${hours}h ago`;
-      }
-      
-      // Format date
-      const day = date.getDate();
-      const month = date.toLocaleString('default', { month: 'short' });
-      return `${month} ${day}`;
+      <div class="comments-list" id="comments-list-<?= $post['title'] ?>">
+
+      </div>
+    </div>
+  <?php endforeach; ?>
+</div>
+
+<script>
+  function formatTime(date) {
+    // Get current time
+    const now = new Date();
+    const diff = now - date;
+
+    // Less than a minute
+    if (diff < 60000) {
+      return 'Just now';
     }
 
-    function addComment(postTitle) {
-      const commentText = document.getElementById(`comment-textarea-${postTitle}`).value;
+    // Less than an hour
+    if (diff < 3600000) {
+      const minutes = Math.floor(diff / 60000);
+      return `${minutes}m ago`;
+    }
 
-      if (commentText.trim()) {
-        const commentsList = document.getElementById(`comments-list-${postTitle}`);
-        
-        // Sample user data
-        const currentUser = "Sam Miller"; 
-        const commentDate = new Date();
-        const profilePic = "uploads/profile.jpg"; 
-        
-        const newComment = document.createElement('div');
-        newComment.classList.add('comment-item');
-        
-        newComment.innerHTML = `
+    // Less than a day
+    if (diff < 86400000) {
+      const hours = Math.floor(diff / 3600000);
+      return `${hours}h ago`;
+    }
+
+    // Format date
+    const day = date.getDate();
+    const month = date.toLocaleString('default', {
+      month: 'short'
+    });
+    return `${month} ${day}`;
+  }
+
+  function addComment(postTitle) {
+    const commentText = document.getElementById(`comment-textarea-${postTitle}`).value;
+
+    if (commentText.trim()) {
+      const commentsList = document.getElementById(`comments-list-${postTitle}`);
+
+      // Sample user data
+      const currentUser = "Juan Dela Cruz";
+      const commentDate = new Date();
+      const profilePic = "uploads/profile.jpg";
+
+      const newComment = document.createElement('div');
+      newComment.classList.add('comment-item');
+
+      newComment.innerHTML = `
           <img src="${profilePic}" alt="${currentUser}" class="comment-avatar">
           <div class="comment-content-wrapper">
             <div class="comment-header">
@@ -272,13 +336,9 @@
           </div>
         `;
 
-        commentsList.appendChild(newComment);
+      commentsList.appendChild(newComment);
 
-        document.getElementById(`comment-textarea-${postTitle}`).value = '';
-      }
+      document.getElementById(`comment-textarea-${postTitle}`).value = '';
     }
-  </script>
-
-</body>
-
-</html>
+  }
+</script>

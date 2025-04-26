@@ -221,6 +221,7 @@
 <div class="feed-container">
   <?php
   // Sample post data
+  // Sample post data
   $posts = [
     [
       'author' => 'Jane Smith',
@@ -229,7 +230,8 @@
       'title' => 'Saving the Earth',
       'content' => 'Let\'s reduce our carbon footprint!',
       'images' => ['deforestation.jpg'],
-      'topic' => 'Climate Change'
+      'topic' => 'Climate Change',
+      'likes' => 0
     ],
     [
       'author' => 'Mark Johnson',
@@ -238,7 +240,8 @@
       'title' => 'Pollution Problem',
       'content' => 'Plastic is everywhere...',
       'images' => ['pollution.jpg'],
-      'topic' => 'Pollution'
+      'topic' => 'Pollution',
+      'likes' => 0
     ]
   ];
 
@@ -263,7 +266,10 @@
         <?php endforeach; ?>
       </div>
       <div class="post-footer">
-        <button class="icon-btn"><i class="fa-regular fa-heart"></i> Like</button>
+        <button id="like-btn-<?= $post['title'] ?>" class="icon-btn" onclick="likePost('<?= $post['title'] ?>')">
+          <i id="like-icon-<?= $post['title'] ?>" class="fa-regular fa-heart"></i>
+          Like <span id="like-count-<?= $post['title'] ?>"><?= $post['likes'] > 0 ? $post['likes'] : '' ?></span>
+        </button>
         <button class="icon-btn"><i class="fa-regular fa-comment"></i>Comment</button>
       </div>
       <!--Comment section of the post -->
@@ -281,6 +287,43 @@
 </div>
 
 <script>
+//function for like functionality
+const postLikes = {};
+  
+  function likePost(postTitle) {
+    
+    if (!postLikes[postTitle]) {
+      postLikes[postTitle] = {
+        count: 0,
+        liked: false
+      };
+    }
+    
+    const likeData = postLikes[postTitle];
+    const likeButton = document.getElementById(`like-btn-${postTitle}`);
+    const likeIcon = document.getElementById(`like-icon-${postTitle}`);
+    const likeCount = document.getElementById(`like-count-${postTitle}`);
+    
+    // Toggle like state
+    if (likeData.liked) {
+      // Unlike
+      likeData.count--;
+      likeData.liked = false;
+      likeIcon.className = "fa-regular fa-heart";
+      likeButton.style.color = "var(--silver)";
+    } else {
+      // Like
+      likeData.count++;
+      likeData.liked = true;
+      likeIcon.className = "fa-solid fa-heart";
+      likeButton.style.color = "var(--moonstone)";
+    }
+    
+    // Update like count display
+    likeCount.textContent = likeData.count > 0 ? likeData.count : '';
+    
+  }
+
   function formatTime(date) {
     // Get current time
     const now = new Date();

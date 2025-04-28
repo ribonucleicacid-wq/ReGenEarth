@@ -699,7 +699,7 @@ include 'inc/header.php';
                     <img src="../assets/images/badges/Level 1_Seedware.png" alt="Level 1 - Seedware" class="badge-icon">
                     <p class="badge-name">Seedware</p>
                     <span class="badge-description">Level 1</span>
-                    <div class="badge-tooltip">Seed + Tech → The impact of your action is just starting, like planting a seed for environmental change. (0 - 500 points)</div>
+                    <div class="badge-tooltip">Seed + Software/Hardware → The impact of your action is just starting, like planting a seed for environmental change. (0 - 500 points)</div>
                 </div>
                 <div class="badge-item">
                     <img src="../assets/images/badges/Level 2_Sprigineer.png" alt="Level 2 - Sprigineer" class="badge-icon">
@@ -711,19 +711,19 @@ include 'inc/header.php';
                     <img src="../assets/images/badges/Level 3_Saplinix.png" alt="Level 3 - Saplinix" class="badge-icon">
                     <p class="badge-name">Saplinix</p>
                     <span class="badge-description">Level 3</span>
-                    <div class="badge-tooltip">Sapling + Tech → Your impact is becoming more noticeable, helping address big environmental challenges. (1,000 - 2,000 points)</div>
+                    <div class="badge-tooltip">Sapling + Matrix → Your impact is becoming more noticeable, helping address big environmental challenges. (1,000 - 2,000 points)</div>
                 </div>
                 <div class="badge-item locked">
                     <img src="../assets/images/badges/Level 4_Treechitect.png" alt="Level 4 - Treechitect" class="badge-icon">
                     <p class="badge-name">Treechitect</p>
                     <span class="badge-description">Level 4</span>
-                    <div class="badge-tooltip">Tree + Builder → Your impact is strong and is helping the environment in a big way. (2,000 - 3,000 points)</div>
+                    <div class="badge-tooltip">Tree + Architect → Your impact is strong and is helping the environment in a big way. (2,000 - 3,000 points)</div>
                 </div>
                 <div class="badge-item locked">
                     <img src="../assets/images/badges/Level 5_Florabyte.png" alt="Level 5 - Florabyte" class="badge-icon">
                     <p class="badge-name">Florabyte</p>
                     <span class="badge-description">Level 5</span>
-                    <div class="badge-tooltip">Flower + Data → Your impact is blooming, combining nature and tech to create solutions for sustainability. (3,000 - 4,000 points)</div>
+                    <div class="badge-tooltip">Flower + Byte → Your impact is blooming, combining nature and tech to create solutions for sustainability. (3,000 - 4,000 points)</div>
                 </div>
                 <div class="badge-item locked">
                     <img src="../assets/images/badges/Level 6_Canopreneur.png" alt="Level 6 - Canopreneur" class="badge-icon">
@@ -735,7 +735,7 @@ include 'inc/header.php';
                     <img src="../assets/images/badges/Level 7_Gaianova.png" alt="Level 7 - Gaianova" class="badge-icon">
                     <p class="badge-name">Gaianova</p>
                     <span class="badge-description">Level 7</span>
-                    <div class="badge-tooltip">Earth + Big Bang → Your impact is massive, causing a transformative change for the planet. (5,000+ points)</div>
+                    <div class="badge-tooltip">Gaia + Nova → Your impact is massive, causing a transformative change for the planet. (5,000+ points)</div>
                 </div>
             </div>
         </div>

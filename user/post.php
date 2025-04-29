@@ -4,6 +4,7 @@
 <html lang="en">
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
 
@@ -156,7 +157,7 @@
       <textarea id="title" name="title" placeholder="Add your title here..." required></textarea>
 
       <label for="content">Caption</label>
-      <textarea id="content" name="content" placeholder="Post your innovations and inspire your community..." required></textarea>
+      <textarea id="content" name="content" placeholder="Enter the details of your invention here..." required></textarea>
 
       <label for="topic">Target TPC:</label>
       <div class="choices-TPC">
@@ -166,7 +167,7 @@
       </div>
 
       <label for="image">Add Photo(s)</label><br>
-      <input type="file" id="image" name"images[]" accept="image/*" multiple>
+      <input type="file" id="image" name="images[]" accept="image/*" multiple>
 
       <div id="preview-container"></div>
 
@@ -182,17 +183,17 @@
     const imageInput = document.getElementById('image');
     const previewContainer = document.getElementById('preview-container');
 
-    imageInput.addEventListener('change', function () {
+    imageInput.addEventListener('change', function() {
       previewContainer.innerHTML = '';
       const files = this.files;
 
       Array.from(files).forEach(file => {
         if (file.type.startsWith('image/')) {
           const reader = new FileReader();
-          reader.onload = function (e) {
+          reader.onload = function(e) {
             const img = document.createElement('img');
             img.src = e.target.result;
-            img.style.width = "100px"; 
+            img.style.width = "100px";
             img.style.margin = "5px";
             previewContainer.appendChild(img);
           };

@@ -1,4 +1,46 @@
-<?php include 'inc/header.php'; ?>
+<?php
+
+date_default_timezone_set('Asia/Manila');
+// Handle post submission
+$new_post = null;
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['title']) && isset($_POST['content']) && isset($_POST['topic'])) {
+  $title = $_POST['title'];
+  $content = $_POST['content'];
+  $topic = $_POST['topic'];
+
+  // Process uploaded images
+  $uploaded_images = [];
+
+  if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
+    $upload_dir = 'uploads/';
+
+    foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+      $file_name = $_FILES['images']['name'][$key];
+      $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+      $new_file_name = uniqid() . '.' . $file_ext;
+
+      if (move_uploaded_file($tmp_name, $upload_dir . $new_file_name)) {
+        $uploaded_images[] = $new_file_name;
+      }
+    }
+  }
+
+  // Create new post with current time
+  $new_post = [
+    'author' => 'Juan Dela Cruz', // sample user
+    'author_image' => 'profile.jpg', // sample profile image
+    'post_time' => date('c'),
+    'title' => $title,
+    'content' => $content,
+    'images' => $uploaded_images,
+    'topic' => $topic,
+    'likes' => 0
+  ];
+}
+
+include 'inc/header.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -49,6 +91,7 @@
       font-size: 16px;
     }
 
+    /*CSS for the content section*/
     .post-time {
       position: absolute;
       right: 10px;
@@ -71,6 +114,7 @@
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 10px;
+      margin-top: 10px;
     }
 
     .post-content {
@@ -214,36 +258,66 @@
     .comment-content {
       word-break: break-word;
     }
+
+    .post-images {
+      margin-bottom: 15px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 8px;
+    }
+
+    .post-images.single-image {
+      grid-template-columns: 1fr;
+    }
+
+    .post-images.single-image img {
+      max-height: 500px;
+    }
+
+    .image-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 75%;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+
+    .image-container img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .more-images-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 
 </head>
 
 <div class="feed-container">
   <?php
-  // Sample post data
-  // Sample post data
-  $posts = [
-    [
-      'author' => 'Jane Smith',
-      'author_image' => 'jane_profile.jpg',
-      'post_time' => '2025-04-20 15:30:00',
-      'title' => 'Saving the Earth',
-      'content' => 'Let\'s reduce our carbon footprint!',
-      'images' => ['deforestation.jpg'],
-      'topic' => 'Climate Change',
-      'likes' => 0
-    ],
-    [
-      'author' => 'Mark Johnson',
-      'author_image' => 'mark_profile.jpg',
-      'post_time' => '2025-04-21 09:15:00',
-      'title' => 'Pollution Problem',
-      'content' => 'Plastic is everywhere...',
-      'images' => ['pollution.jpg'],
-      'topic' => 'Pollution',
-      'likes' => 0
-    ]
-  ];
+  // Initialize empty posts array to store database results
+  $posts = [];
+  
+  // Add the new post to the beginning of the array if it exists
+  if ($new_post) {
+    array_unshift($posts, $new_post);
+  }
 
   foreach ($posts as $post) :
   ?>
@@ -254,79 +328,77 @@
         <div class="author-info">
           <div class="author-name"><?= htmlspecialchars($post['author']) ?></div>
           <div class="post-topic"><?= htmlspecialchars($post['topic']) ?></div>
-          <div class="post-time"><?= date('M d \a\t g:i a', strtotime($post['post_time'])) ?></div>
+          <!-- Changed post time to use data-timestamp and formatTime -->
+          <div class="post-time" data-timestamp="<?= $post['post_time'] ?>"></div>
         </div>
       </div>
       <!--Content of the post -->
       <div class="post-header"><?= htmlspecialchars($post['title']) ?></div>
       <div class="post-content"><?= htmlspecialchars($post['content']) ?></div>
-      <div class="post-images">
-        <?php foreach ($post['images'] as $image) : ?>
-          <img src="uploads/<?= htmlspecialchars($image) ?>">
-        <?php endforeach; ?>
+      <div class="post-images <?= count($post['images']) === 1 ? 'single-image' : '' ?>">
+        <?php
+        $total_images = count($post['images']);
+        $display_count = min(4, $total_images);
+        $remaining = $total_images - $display_count;
+
+        for ($i = 0; $i < $display_count; $i++) :
+          $image = $post['images'][$i];
+        ?>
+          <div class="image-container">
+            <img src="uploads/<?= htmlspecialchars($image) ?>" alt="Post image">
+            <?php if ($i === 3 && $remaining > 0) : ?>
+              <div class="more-images-overlay">+<?= $remaining ?></div>
+            <?php endif; ?>
+          </div>
+        <?php endfor; ?>
       </div>
       <div class="post-footer">
-        <button id="like-btn-<?= $post['title'] ?>" class="icon-btn" onclick="likePost('<?= $post['title'] ?>')">
-          <i id="like-icon-<?= $post['title'] ?>" class="fa-regular fa-heart"></i>
-          Like <span id="like-count-<?= $post['title'] ?>"><?= $post['likes'] > 0 ? $post['likes'] : '' ?></span>
+        <button id="like-btn-<?= md5($post['title'] . $post['post_time']) ?>" class="icon-btn" onclick="likePost('<?= md5($post['title'] . $post['post_time']) ?>')">
+          <i id="like-icon-<?= md5($post['title'] . $post['post_time']) ?>" class="fa-regular fa-heart"></i>
+          Like <span id="like-count-<?= md5($post['title'] . $post['post_time']) ?>"><?= $post['likes'] > 0 ? $post['likes'] : '' ?></span>
         </button>
         <button class="icon-btn"><i class="fa-regular fa-comment"></i>Comment</button>
       </div>
       <!--Comment section of the post -->
       <div class="comment-box">
         <img src="uploads/profile.jpg" alt="Your Profile" class="user-avatar">
-        <textarea id="comment-textarea-<?= $post['title'] ?>" placeholder="Write a comment..."></textarea>
-        <button class="icon-btn" onclick="addComment('<?= $post['title'] ?>')"><i class="fas fa-paper-plane"></i></button>
+        <textarea id="comment-textarea-<?= md5($post['title'] . $post['post_time']) ?>" placeholder="Write a comment..."></textarea>
+        <button class="icon-btn" onclick="addComment('<?= md5($post['title'] . $post['post_time']) ?>')"><i class="fas fa-paper-plane"></i></button>
       </div>
 
-      <div class="comments-list" id="comments-list-<?= $post['title'] ?>">
-
+      <div class="comments-list" id="comments-list-<?= md5($post['title'] . $post['post_time']) ?>">
+        <!-- Comments will be added here dynamically -->
       </div>
     </div>
   <?php endforeach; ?>
 </div>
 
 <script>
-//function for like functionality
-const postLikes = {};
+  const postCreationTimes = {};
   
-  function likePost(postTitle) {
-    
-    if (!postLikes[postTitle]) {
-      postLikes[postTitle] = {
-        count: 0,
-        liked: false
-      };
-    }
-    
-    const likeData = postLikes[postTitle];
-    const likeButton = document.getElementById(`like-btn-${postTitle}`);
-    const likeIcon = document.getElementById(`like-icon-${postTitle}`);
-    const likeCount = document.getElementById(`like-count-${postTitle}`);
-    
-    // Toggle like state
-    if (likeData.liked) {
-      // Unlike
-      likeData.count--;
-      likeData.liked = false;
-      likeIcon.className = "fa-regular fa-heart";
-      likeButton.style.color = "var(--silver)";
-    } else {
-      // Like
-      likeData.count++;
-      likeData.liked = true;
-      likeIcon.className = "fa-solid fa-heart";
-      likeButton.style.color = "var(--moonstone)";
-    }
-    
-    // Update like count display
-    likeCount.textContent = likeData.count > 0 ? likeData.count : '';
-    
-  }
+  <?php foreach ($posts as $post): ?>
+  postCreationTimes['<?= md5($post['title'] . $post['post_time']) ?>'] = '<?= $post['post_time'] ?>';
+  <?php endforeach; ?>
 
-  function formatTime(date) {
+  // Function to format time
+  function formatTime(dateInput) {
+    let date;
+    
+    // Handle both Date objects and ISO strings
+    if (typeof dateInput === 'string') {
+      date = new Date(dateInput);
+    } else {
+      date = dateInput;
+    }
+    
     // Get current time
     const now = new Date();
+    
+    // Ensure valid date
+    if (isNaN(date.getTime())) {
+      return 'Invalid date';
+    }
+    
     const diff = now - date;
 
     // Less than a minute
@@ -345,6 +417,12 @@ const postLikes = {};
       const hours = Math.floor(diff / 3600000);
       return `${hours}h ago`;
     }
+    
+    // Less than a week
+    if (diff < 604800000) {
+      const days = Math.floor(diff / 86400000);
+      return `${days}d ago`;
+    }
 
     // Format date
     const day = date.getDate();
@@ -354,11 +432,60 @@ const postLikes = {};
     return `${month} ${day}`;
   }
 
-  function addComment(postTitle) {
-    const commentText = document.getElementById(`comment-textarea-${postTitle}`).value;
+
+  function updateAllTimes() {
+    // Update both comment times and post times
+    document.querySelectorAll('[data-timestamp]').forEach(timeElement => {
+      const timestamp = timeElement.getAttribute('data-timestamp');
+      timeElement.textContent = formatTime(timestamp);
+    });
+  }
+
+  updateAllTimes();
+
+  // Update every minute to keep times current
+  setInterval(updateAllTimes, 60000);
+
+  //function for like functionality
+  const postLikes = {};
+
+  function likePost(postId) {
+    if (!postLikes[postId]) {
+      postLikes[postId] = {
+        count: 0,
+        liked: false
+      };
+    }
+
+    const likeData = postLikes[postId];
+    const likeButton = document.getElementById(`like-btn-${postId}`);
+    const likeIcon = document.getElementById(`like-icon-${postId}`);
+    const likeCount = document.getElementById(`like-count-${postId}`);
+
+    // Toggle like state
+    if (likeData.liked) {
+      // Unlike
+      likeData.count--;
+      likeData.liked = false;
+      likeIcon.className = "fa-regular fa-heart";
+      likeButton.style.color = "var(--silver)";
+    } else {
+      // Like
+      likeData.count++;
+      likeData.liked = true;
+      likeIcon.className = "fa-solid fa-heart";
+      likeButton.style.color = "var(--moonstone)";
+    }
+
+    // Update like count display
+    likeCount.textContent = likeData.count > 0 ? likeData.count : '';
+  }
+
+  function addComment(postId) {
+    const commentText = document.getElementById(`comment-textarea-${postId}`).value;
 
     if (commentText.trim()) {
-      const commentsList = document.getElementById(`comments-list-${postTitle}`);
+      const commentsList = document.getElementById(`comments-list-${postId}`);
 
       // Sample user data
       const currentUser = "Juan Dela Cruz";
@@ -367,13 +494,16 @@ const postLikes = {};
 
       const newComment = document.createElement('div');
       newComment.classList.add('comment-item');
+      
+      // Store ISO timestamp for accurate time display
+      const commentTimestamp = commentDate.toISOString();
 
       newComment.innerHTML = `
           <img src="${profilePic}" alt="${currentUser}" class="comment-avatar">
           <div class="comment-content-wrapper">
             <div class="comment-header">
               <span class="comment-user">${currentUser}</span>
-              <span class="comment-time">${formatTime(commentDate)}</span>
+              <span class="comment-time" data-timestamp="${commentTimestamp}">${formatTime(commentDate)}</span>
             </div>
             <div class="comment-content">${commentText}</div>
           </div>
@@ -381,7 +511,8 @@ const postLikes = {};
 
       commentsList.appendChild(newComment);
 
-      document.getElementById(`comment-textarea-${postTitle}`).value = '';
+      document.getElementById(`comment-textarea-${postId}`).value = '';
     }
   }
+  
 </script>

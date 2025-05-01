@@ -91,7 +91,6 @@ include 'inc/header.php';
       font-size: 16px;
     }
 
-    /*CSS for the content section*/
     .post-time {
       position: absolute;
       right: 10px;
@@ -114,7 +113,6 @@ include 'inc/header.php';
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 10px;
-      margin-top: 10px;
     }
 
     .post-content {
@@ -124,16 +122,17 @@ include 'inc/header.php';
 
     .post-images {
       margin-bottom: 15px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 8px;
     }
 
-    .post-images img {
-      width: 100%;
-      height: auto;
-      max-height: 400px;
-      object-fit: cover;
-      border-radius: 8px;
-      display: block;
-      margin-bottom: 10px;
+    .post-images.single-image {
+      grid-template-columns: 1fr;
+    }
+
+    .post-images.single-image img {
+      max-height: 500px;
     }
 
     .post-footer {
@@ -259,21 +258,6 @@ include 'inc/header.php';
       word-break: break-word;
     }
 
-    .post-images {
-      margin-bottom: 15px;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      grid-gap: 8px;
-    }
-
-    .post-images.single-image {
-      grid-template-columns: 1fr;
-    }
-
-    .post-images.single-image img {
-      max-height: 500px;
-    }
-
     .image-container {
       position: relative;
       width: 100%;
@@ -281,6 +265,7 @@ include 'inc/header.php';
       padding-bottom: 75%;
       overflow: hidden;
       border-radius: 8px;
+      cursor: pointer;
     }
 
     .image-container img {
@@ -288,6 +273,11 @@ include 'inc/header.php';
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .image-container:hover img {
+      transform: scale(1.03);
     }
 
     .more-images-overlay {
@@ -305,6 +295,116 @@ include 'inc/header.php';
       font-weight: bold;
       cursor: pointer;
     }
+
+    /* Image Gallery Lightbox */
+    .lightbox-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .lightbox-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .lightbox-container {
+      position: relative;
+      max-width: 90%;
+      max-height: 90%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lightbox-image {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -30px;
+      right: 0;
+      color: white;
+      font-size: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 1001;
+    }
+
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      transform: translateY(-50%);
+    }
+
+    .lightbox-nav button {
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      font-size: 10px;
+      padding: 7px 10px;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: background-color 0.3s;
+    }
+
+    .lightbox-nav button:hover {
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .lightbox-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      color: white;
+    }
+
+    .lightbox-counter {
+      color: white;
+      font-size: 14px;
+    }
+
+    .lightbox-actions {
+      display: flex;
+      gap: 20px;
+    }
+
+    .lightbox-actions button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .lightbox-actions button:hover {
+      color: var(--moonstone);
+    }
+
+    .image-container:hover{
+      opacity: 1;
+    }
   </style>
 
 </head>
@@ -320,6 +420,7 @@ include 'inc/header.php';
   }
 
   foreach ($posts as $post) :
+    $post_id = md5($post['title'] . $post['post_time']);
   ?>
     <div class="post-card">
       <!--Author section at the top of the post -->
@@ -328,59 +429,89 @@ include 'inc/header.php';
         <div class="author-info">
           <div class="author-name"><?= htmlspecialchars($post['author']) ?></div>
           <div class="post-topic"><?= htmlspecialchars($post['topic']) ?></div>
-          <!-- Changed post time to use data-timestamp and formatTime -->
           <div class="post-time" data-timestamp="<?= $post['post_time'] ?>"></div>
         </div>
       </div>
       <!--Content of the post -->
       <div class="post-header"><?= htmlspecialchars($post['title']) ?></div>
       <div class="post-content"><?= htmlspecialchars($post['content']) ?></div>
-      <div class="post-images <?= count($post['images']) === 1 ? 'single-image' : '' ?>">
-        <?php
-        $total_images = count($post['images']);
-        $display_count = min(4, $total_images);
-        $remaining = $total_images - $display_count;
+      <?php if (!empty($post['images'])) : ?>
+        <div class="post-images <?= count($post['images']) === 1 ? 'single-image' : '' ?>">
+          <?php
+          $total_images = count($post['images']);
+          $display_count = min(4, $total_images);
+          $remaining = $total_images - $display_count;
 
-        for ($i = 0; $i < $display_count; $i++) :
-          $image = $post['images'][$i];
-        ?>
-          <div class="image-container">
-            <img src="uploads/<?= htmlspecialchars($image) ?>" alt="Post image">
-            <?php if ($i === 3 && $remaining > 0) : ?>
-              <div class="more-images-overlay">+<?= $remaining ?></div>
-            <?php endif; ?>
-          </div>
-        <?php endfor; ?>
-      </div>
+          for ($i = 0; $i < $display_count; $i++) :
+            $image = $post['images'][$i];
+            $image_id = md5($post_id . $i);
+          ?>
+            <div class="image-container" onclick="openLightbox('<?= $post_id ?>', <?= $i ?>)">
+              <img src="uploads/<?= htmlspecialchars($image) ?>" alt="Post image">
+              <?php if ($i === 3 && $remaining > 0) : ?>
+                <div class="more-images-overlay">+<?= $remaining ?></div>
+              <?php endif; ?>
+            </div>
+          <?php endfor; ?>
+        </div>
+      <?php endif; ?>
       <div class="post-footer">
-        <button id="like-btn-<?= md5($post['title'] . $post['post_time']) ?>" class="icon-btn" onclick="likePost('<?= md5($post['title'] . $post['post_time']) ?>')">
-          <i id="like-icon-<?= md5($post['title'] . $post['post_time']) ?>" class="fa-regular fa-heart"></i>
-          Like <span id="like-count-<?= md5($post['title'] . $post['post_time']) ?>"><?= $post['likes'] > 0 ? $post['likes'] : '' ?></span>
+        <button id="like-btn-<?= $post_id ?>" class="icon-btn" onclick="likePost('<?= $post_id ?>')">
+          <i id="like-icon-<?= $post_id ?>" class="fa-regular fa-heart"></i>
+          Like <span id="like-count-<?= $post_id ?>"><?= $post['likes'] > 0 ? $post['likes'] : '' ?></span>
         </button>
-        <button class="icon-btn"><i class="fa-regular fa-comment"></i>Comment</button>
+        <button class="icon-btn" onclick="focusCommentBox('<?= $post_id ?>')">
+          <i class="fa-regular fa-comment"></i>Comment
+        </button>
       </div>
       <!--Comment section of the post -->
       <div class="comment-box">
         <img src="uploads/profile.jpg" alt="Your Profile" class="user-avatar">
-        <textarea id="comment-textarea-<?= md5($post['title'] . $post['post_time']) ?>" placeholder="Write a comment..."></textarea>
-        <button class="icon-btn" onclick="addComment('<?= md5($post['title'] . $post['post_time']) ?>')"><i class="fas fa-paper-plane"></i></button>
+        <textarea id="comment-textarea-<?= $post_id ?>" placeholder="Write a comment..."></textarea>
+        <button class="icon-btn" onclick="addComment('<?= $post_id ?>')"><i class="fas fa-paper-plane"></i></button>
       </div>
 
-      <div class="comments-list" id="comments-list-<?= md5($post['title'] . $post['post_time']) ?>">
+      <div class="comments-list" id="comments-list-<?= $post_id ?>">
         <!-- Comments will be added here dynamically -->
       </div>
     </div>
   <?php endforeach; ?>
 </div>
 
+<!-- Image Lightbox Gallery -->
+<div class="lightbox-overlay" id="lightbox-overlay">
+  <div class="lightbox-container">
+    <button class="lightbox-close" onclick="closeLightbox()">
+      <i class="fas fa-times"></i>
+    </button>
+    
+    <img src="" alt="Full size image" id="lightbox-image" class="lightbox-image">
+    
+    <div class="lightbox-nav">
+      <button onclick="navigateImage(-1)">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <button onclick="navigateImage(1)">
+        <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+    
+    <div class="lightbox-footer">
+      <span class="lightbox-counter" id="lightbox-counter">1 of 5</span>
+      
+    </div>
+  </div>
+</div>
+
 <script>
+  // Store post creation times
   const postCreationTimes = {};
   
   <?php foreach ($posts as $post): ?>
   postCreationTimes['<?= md5($post['title'] . $post['post_time']) ?>'] = '<?= $post['post_time'] ?>';
   <?php endforeach; ?>
 
-  // Function to format time
+  // Format time function
   function formatTime(dateInput) {
     let date;
     
@@ -432,21 +563,19 @@ include 'inc/header.php';
     return `${month} ${day}`;
   }
 
-
+  // Update all timestamps
   function updateAllTimes() {
-    // Update both comment times and post times
     document.querySelectorAll('[data-timestamp]').forEach(timeElement => {
       const timestamp = timeElement.getAttribute('data-timestamp');
       timeElement.textContent = formatTime(timestamp);
     });
   }
 
+  // Initialize times and update every minute
   updateAllTimes();
-
-  // Update every minute to keep times current
   setInterval(updateAllTimes, 60000);
 
-  //function for like functionality
+  // Post like functionality
   const postLikes = {};
 
   function likePost(postId) {
@@ -481,6 +610,7 @@ include 'inc/header.php';
     likeCount.textContent = likeData.count > 0 ? likeData.count : '';
   }
 
+  // Comment functionality
   function addComment(postId) {
     const commentText = document.getElementById(`comment-textarea-${postId}`).value;
 
@@ -510,9 +640,97 @@ include 'inc/header.php';
         `;
 
       commentsList.appendChild(newComment);
-
       document.getElementById(`comment-textarea-${postId}`).value = '';
+      updateAllTimes();
     }
   }
+
+  function focusCommentBox(postId) {
+    document.getElementById(`comment-textarea-${postId}`).focus();
+  }
+
+  function commentOnImage(imageId, event) {
+    event.stopPropagation(); // Prevent opening lightbox
+    // You could implement a separate image comment system or integrate it with the post comments
+    alert("Image comment feature coming soon!");
+  }
+
+  const postImagesData = {};
   
+  <?php foreach ($posts as $post): ?>
+  <?php if (!empty($post['images'])): ?>
+  postImagesData['<?= md5($post['title'] . $post['post_time']) ?>'] = [
+    <?php foreach ($post['images'] as $image): ?>
+    'uploads/<?= htmlspecialchars($image) ?>',
+    <?php endforeach; ?>
+  ];
+  <?php endif; ?>
+  <?php endforeach; ?>
+
+  // Lightbox Gallery
+  let currentPostId = null;
+  let currentImageIndex = 0;
+  let currentPostImages = [];
+
+  function openLightbox(postId, imageIndex) {
+    currentPostId = postId;
+    currentImageIndex = imageIndex;
+    
+    // Use the complete array of images stored in our data object
+    currentPostImages = postImagesData[postId] || [];
+    
+    // Display the current image
+    document.getElementById('lightbox-image').src = currentPostImages[currentImageIndex];
+    document.getElementById('lightbox-counter').textContent = `${currentImageIndex + 1} of ${currentPostImages.length}`;
+    
+    // Show lightbox
+    document.getElementById('lightbox-overlay').classList.add('active');
+    
+    // Prevent page scrolling when lightbox is open
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox-overlay').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  function navigateImage(direction) {
+    currentImageIndex += direction;
+    
+    // Handle wrapping around
+    if (currentImageIndex < 0) {
+      currentImageIndex = currentPostImages.length - 1;
+    } else if (currentImageIndex >= currentPostImages.length) {
+      currentImageIndex = 0;
+    }
+    
+    // Update image and counter
+    document.getElementById('lightbox-image').src = currentPostImages[currentImageIndex];
+    document.getElementById('lightbox-counter').textContent = `${currentImageIndex + 1} of ${currentPostImages.length}`;
+  }
+
+  // Close lightbox when clicking outside of image
+  document.getElementById('lightbox-overlay').addEventListener('click', function(event) {
+    if (event.target === this) {
+      closeLightbox();
+    }
+  });
+
+  // Keyboard navigation for lightbox
+  document.addEventListener('keydown', function(event) {
+    if (!document.getElementById('lightbox-overlay').classList.contains('active')) return;
+    
+    switch(event.key) {
+      case 'Escape':
+        closeLightbox();
+        break;
+      case 'ArrowLeft':
+        navigateImage(-1);
+        break;
+      case 'ArrowRight':
+        navigateImage(1);
+        break;
+    }
+  });
 </script>

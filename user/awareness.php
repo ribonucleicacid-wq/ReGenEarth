@@ -20,7 +20,7 @@ include 'inc/header.php';
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(rgba(0, 28, 46, 0.85), rgba(0, 28, 46, 0.85));
+            background: linear-gradient(rgba(0, 28, 46, 0.70), rgba(0, 28, 46, 0.70));
             background-size: cover;
             background-position: center;
             position: relative;
@@ -294,7 +294,7 @@ include 'inc/header.php';
             display: flex;
         }
         .awareness-container .modal-content {
-            background: #163a54;
+            background: linear-gradient(90deg, #0f2d54 0%, #0c4d50 100%);
             color: #fff;
             border-radius: 24px 24px 0 0;
             width: 100%;
@@ -364,52 +364,107 @@ include 'inc/header.php';
             backdrop-filter: blur(10px);
             z-index: 100;
         }
-        /* Responsive styles scoped as well */
+        /* General responsiveness for smaller screens */
         @media (max-width: 1200px) {
             .awareness-container .image-grid {
-                height: 260px;
+                height: auto;
                 gap: 1rem;
+                flex-wrap: wrap;
             }
             .awareness-container .image-card {
-                border-radius: 24px;
+                flex: 1 1 calc(50% - 1rem);
+                height: 200px;
             }
             .awareness-container .image-card img {
-                border-radius: 24px;
+                border-radius: 16px;
             }
             .content-cards {
                 width: 70%;
             }
         }
+
         @media (max-width: 900px) {
-            .awareness-container .image-grid {
-                height: 160px;
-            }
-        }
-        @media (max-width: 600px) {
             .awareness-container .image-grid {
                 flex-direction: column;
                 height: auto;
+                gap: 1rem;
+            }
+            .awareness-container .image-card {
+                flex: 1 1 100%;
+                height: 180px;
+            }
+            .awareness-container .static-title {
+                font-size: 1.8rem;
+            }
+            .content-cards {
+                width: 80%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .awareness-container .image-grid {
                 gap: 0.5rem;
             }
             .awareness-container .image-card {
-                height: 120px;
-                min-height: 80px;
-                flex: 1 1 0;
-                border-radius: 16px;
+                height: 150px;
             }
-            .awareness-container .image-card img {
-                border-radius: 16px;
+            .awareness-container .static-title {
+                font-size: 1.5rem;
             }
-        }
-        @media (max-width: 768px) {
             .content-cards {
                 width: 90%;
             }
             .content-card {
-                padding: 2rem 1.5rem;
+                padding: 1.5rem;
             }
             .content-card h2 {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .awareness-container .image-grid {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .awareness-container .image-card {
+                height: 120px;
+            }
+            .awareness-container .static-title {
+                font-size: 1.2rem;
+            }
+            .content-cards {
+                width: 95%;
+            }
+            .content-card {
+                padding: 1rem;
+            }
+            .content-card h2 {
+                font-size: 1.2rem;
+            }
+            .content-card ul {
+                font-size: 0.9rem;
+            }
+            .content-card li {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .awareness-container .image-card {
+                height: 100px;
+            }
+            .awareness-container .static-title {
+                font-size: 1rem;
+            }
+            .content-card h2 {
+                font-size: 1rem;
+            }
+            .content-card ul {
+                font-size: 0.8rem;
+            }
+            .content-card li {
+                font-size: 0.8rem;
             }
         }
 
@@ -421,7 +476,7 @@ include 'inc/header.php';
         }
 
         .content-card {
-            background: rgba(22, 58, 84, 0.95);
+            background: linear-gradient(90deg, #0f2d54 0%, #0c4d50 100%);
             border-radius: 16px;
             padding: 2.5rem;
             margin: 0;
@@ -442,10 +497,37 @@ include 'inc/header.php';
 
         .content-card h2 {
             font-family: 'Montserrat', Arial, sans-serif;
-            font-size: 2.2rem;
-            font-weight: 700;
+            font-size: 1.8rem;
+            font-weight: 600;
             margin-bottom: 1.5rem;
             color: #00a2ff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card .section-title {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: #00a2ff;
+            margin: 2rem 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h2::before,
+        .content-card .section-title::before {
+            font-size: 1.5rem;
+        }
+
+        .content-card h2::before {
+            content: "🚨";
+        }
+
+        .content-card .section-title::before {
+            content: "💥";
         }
 
         .content-card p {
@@ -477,14 +559,6 @@ include 'inc/header.php';
             left: 0;
         }
 
-        .content-card .section-title {
-            font-family: 'Montserrat', Arial, sans-serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #00a2ff;
-            margin: 2rem 0 1rem;
-        }
-
         .close-card {
             position: absolute;
             top: 1.2rem;
@@ -506,6 +580,66 @@ include 'inc/header.php';
         .close-card:hover {
             background: rgba(255,255,255,0.08);
         }
+
+        body {
+            background-size: cover !important;
+            background-position: center !important;
+            background-attachment: fixed !important;
+            transition: background 0.3s ease;
+        }
+
+        .button-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 3;
+        }
+
+        .image-card:hover .button-container {
+            opacity: 1;
+        }
+
+        .learn-more-btn, .how-to-help-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .learn-more-btn {
+            background-color: #00a2ff;
+            color: white;
+        }
+
+        .how-to-help-btn {
+            background-color: rgba(0, 162, 255, 0.1);
+            color: #00a2ff;
+            border: 2px solid #00a2ff;
+        }
+
+        .learn-more-btn:hover, .how-to-help-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .learn-more-btn:hover {
+            background-color: #0088d6;
+        }
+
+        .how-to-help-btn:hover {
+            background-color: rgba(0, 162, 255, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -520,6 +654,10 @@ include 'inc/header.php';
                         <p>The TPC refers to three <strong>interconnected environmental threats</strong> caused by human activity: <strong>Pollution, Climate Change, and Biodiversity Loss</strong>.</p>
                         <p>These problems might sound overwhelming, but knowledge is power! Keep reading to uncover the causes, impacts, and—most importantly—<strong>how YOU can make a difference</strong>.</p>
                     </div>
+                    <div class="button-container">
+                        <button class="learn-more-btn">Learn More</button>
+                        <button class="how-to-help-btn">How to Help</button>
+                    </div>
                     <div class="image-label">The Triple Planetary Crisis</div>
                 </div>
                 <div class="image-card" data-category="pollution">
@@ -527,6 +665,9 @@ include 'inc/header.php';
                     <div class="info-overlay">
                         <h2 class="main-title">Pollution</h2>
                         <p>Pollution exists in many forms—air, water, soil, and plastic waste. Factories, vehicles, and improper waste disposal introduce harmful chemicals into our surroundings. Burning fossil fuels (coal, oil, gas) releases pollutants that poison the air we breathe and disrupt ecosystems.</p>
+                    </div>
+                    <div class="button-container">
+                        <button class="learn-more-btn">Learn More</button>
                     </div>
                     <div class="image-label">Pollution</div>
                     <div class="subtitle">A toxic legacy</div>
@@ -537,6 +678,9 @@ include 'inc/header.php';
                         <h2 class="main-title">Climate Change</h2>
                         <p>Climate change results from <strong>greenhouse gases</strong>—mainly from burning fossil fuels—which trap heat in the atmosphere, leading to a warming Earth, rising sea levels, and extreme weather patterns.</p>
                     </div>
+                    <div class="button-container">
+                        <button class="learn-more-btn">Learn More</button>
+                    </div>
                     <div class="image-label">Climate Change</div>
                     <div class="subtitle">A Warming World</div>
                 </div>
@@ -545,6 +689,9 @@ include 'inc/header.php';
                     <div class="info-overlay">
                         <h2 class="main-title">Biodiversity Loss</h2>
                         <p>Nature thrives on balance, but human activities disrupt ecosystems, leading to the <strong>loss of plant and animal species at alarming rates</strong>. Deforestation and pollution force countless species to <strong>struggle for survival</strong>.</p>
+                    </div>
+                    <div class="button-container">
+                        <button class="learn-more-btn">Learn More</button>
                     </div>
                     <div class="image-label">Biodiversity Loss</div>
                     <div class="subtitle">A Silent Disaster</div>
@@ -563,13 +710,13 @@ include 'inc/header.php';
 
                 <div class="content-card" id="pollutionCard" style="display: none;">
                     <button class="close-card">×</button>
-                    <h2>🚨 Causes of Pollution</h2>
+                    <h2>Causes of Pollution</h2>
                     <ul>
                         <li>Heavy reliance on fossil fuels for energy and transportation</li>
                         <li>Industrial waste dumping and improper waste management</li>
                         <li>Excessive plastic use and lack of recycling</li>
                     </ul>
-                    <div class="section-title">💥 Impacts of Pollution</div>
+                    <div class="section-title">Impacts of Pollution</div>
                     <ul>
                         <li>Human Health: Causes respiratory diseases, water contamination, and other health problems.</li>
                         <li>Economic Burden: Pollution-related illnesses increase healthcare costs and reduce productivity.</li>
@@ -579,14 +726,14 @@ include 'inc/header.php';
 
                 <div class="content-card" id="climateCard" style="display: none;">
                     <button class="close-card">×</button>
-                    <h2>🔥 Causes of Climate Change</h2>
+                    <h2>Causes of Climate Change</h2>
                     <ul>
                         <li>Burning fossil fuels like coal, oil, and gas for energy.</li>
                         <li>Deforestation for land and industry.</li>
                         <li>Excessive emissions from vehicles, factories, and power plants.</li>
                         <li>Unsustainable farming and waste.</li>
                     </ul>
-                    <div class="section-title">🌍 Impacts of Climate Change</div>
+                    <div class="section-title">Impacts of Climate Change</div>
                     <ul>
                         <li>More frequent storms, droughts, and heat waves.</li>
                         <li>Rising sea levels threatening coastal communities.</li>
@@ -597,13 +744,13 @@ include 'inc/header.php';
 
                 <div class="content-card" id="biodiversityCard" style="display: none;">
                     <button class="close-card">×</button>
-                    <h2>⭕ Causes of Biodiversity Loss</h2>
+                    <h2>Causes of Biodiversity Loss</h2>
                     <ul>
                         <li>Land clearing for mining and energy production.</li>
                         <li>Pollution destroying habitats and food sources.</li>
                         <li>Overexploitation of natural resources without restoration efforts.</li>
                     </ul>
-                    <div class="section-title">🌱 Impacts of Biodiversity Loss</div>
+                    <div class="section-title">Impacts of Biodiversity Loss</div>
                     <ul>
                         <li>Ecosystem Collapse: Loss of essential species weakens food chains and disrupts nature's balance.</li>
                         <li>Declining Natural Resources: Fewer fish, plants, and animals for food and medicine.</li>
@@ -714,134 +861,42 @@ include 'inc/header.php';
             const imageCards = document.querySelectorAll('.image-card');
             const contentCards = document.querySelectorAll('.content-card');
             const closeButtons = document.querySelectorAll('.close-card');
-            const mainContent = document.getElementById('mainContent');
-            const pollutionContent = document.getElementById('pollutionContent');
-            const climateContent = document.getElementById('climateContent');
-            const biodiversityContent = document.getElementById('biodiversityContent');
-            const learnMoreBtn = document.querySelector('.learn-more');
-            const howToHelpBtn = document.querySelector('.how-to-help');
-            const learnMoreModal = document.getElementById('learnMoreModal');
-            const howToHelpModal = document.getElementById('howToHelpModal');
             const body = document.querySelector('body');
+            const tpcCard = document.getElementById('tpcCard');
 
-            let currentSection = 'main';
+            // Define background images for each category
+            const bgMap = {
+                'tpc': '../assets/images/tripleplanetary1.jpg',
+                'pollution': '../assets/images/pollution1.jpg',
+                'climate': '../assets/images/climate_change1.jpg',
+                'biodiversity': '../assets/images/bioloss1.jpg'
+            };
 
-            async function updateContent(section) {
-                // Add fade out effect
-                const currentContent = document.querySelector('.content-wrapper[style="display: block"]');
-                if (currentContent) {
-                    currentContent.classList.add('fade-out');
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
+            // Store original TPC content
+            const originalTpcContent = tpcCard.innerHTML;
 
-                // Hide all content first
-                document.querySelectorAll('.content-wrapper').forEach(content => {
-                    content.style.display = 'none';
-                    content.classList.remove('fade-out');
-                });
+            // How to Help content
+            const howToHelpContent = `
+                <button class="close-card">×</button>
+                <h2>Ways to Combat the Triple Planetary Crisis</h2>
+                <ul>
+                    <li><strong>Reduce Carbon Footprint:</strong> Choose sustainable transportation, energy-efficient appliances, and renewable energy sources</li>
+                    <li><strong>Conserve Energy:</strong> Turn off unused electronics and lights; consider solar panels for your home</li>
+                    <li><strong>Protect Habitats:</strong> Participate in reforestation and conservation projects</li>
+                    <li><strong>Support Sustainable Practices:</strong> Promote eco-friendly farming and fishing</li>
+                    <li><strong>Minimize Plastic Usage:</strong> Opt for reusable items like eco-bags and stainless containers</li>
+                    <li><strong>Dispose of Waste Responsibly:</strong> Recycle, compost, and properly discard hazardous waste</li>
+                    <li><strong>Back Eco-Friendly Industries:</strong> Support businesses and policies that reduce pollution</li>
+                    <li><strong>Raise Awareness:</strong> Share knowledge and advocate for green initiatives</li>
+                    <li><strong>Engage in Environmental Campaigns:</strong> Take action locally or globally</li>
+                </ul>
+            `;
 
-                // Show selected content with fade in
-                let targetContent;
-                if (section === 'main') {
-                    targetContent = mainContent;
-                    body.style.backgroundImage = "url('../assets/images/tripleplanetary1.jpg')";
-                } else if (section === 'pollution') {
-                    targetContent = pollutionContent;
-                    body.style.backgroundImage = "url('../assets/images/pollution1.jpg')";
-                } else if (section === 'climate') {
-                    targetContent = climateContent;
-                    body.style.backgroundImage = "url('../assets/images/climate_change1.jpg')";
-                } else if (section === 'biodiversity') {
-                    targetContent = biodiversityContent;
-                    body.style.backgroundImage = "url('../assets/images/bioloss1.jpg')";
-                }
-
-                if (targetContent) {
-                    targetContent.style.display = 'block';
-                    await new Promise(resolve => setTimeout(resolve, 50));
-                    targetContent.classList.remove('fade-out');
-                }
-
-                currentSection = section;
-            }
-
-            function attachCloseHandlers() {
-                document.querySelectorAll('.close').forEach(closeBtn => {
-                    closeBtn.addEventListener('click', () => {
-                        const modal = closeBtn.closest('.modal');
-                        modal.classList.remove('active');
-                        setTimeout(() => {
-                            modal.style.display = 'none';
-                        }, 300);
-                    });
-                });
-            }
-
-            function showLearnMoreContent() {
-                const modalContent = learnMoreModal.querySelector('.modal-content');
-                
-                // Clear existing content
-                modalContent.innerHTML = '<button class="close">×</button>';
-
-                if (currentSection === 'main') {
-                    modalContent.innerHTML += `
-                        <h2>What's Really Happening to Our Planet?</h2>
-                        <p>Imagine waking up to skies thick with smog, oceans choked with plastic, and forests reduced to barren wastelands. <strong>This isn't science fiction—it's our reality.</strong></p>
-                        <p>Pollution, climate change, and biodiversity loss are pushing Earth to its limits. Together, these crises form the <strong>Triple Planetary Crisis (TPC)</strong>—an urgent environmental challenge that affects everyone, from bustling cities to remote villages.</p>
-                        <p>But here's the good news: <strong>we still have time to act!</strong></p>
-                    `;
-                } else if (currentSection === 'pollution') {
-                    modalContent.innerHTML += `
-                        <h2>🚨 Causes of Pollution</h2>
-                        <ul>
-                            <li>Heavy reliance on fossil fuels for energy and transportation</li>
-                            <li>Industrial waste dumping and improper waste management</li>
-                            <li>Excessive plastic use and lack of recycling</li>
-                        </ul>
-                        <div class="section-title">💥 Impacts of Pollution</div>
-                        <ul>
-                            <li>Human Health: Causes respiratory diseases, water contamination, and other health problems.</li>
-                            <li>Economic Burden: Pollution-related illnesses increase healthcare costs and reduce productivity.</li>
-                            <li>Environmental Damage: Toxic substances seep into soil and water, harming wildlife and crops.</li>
-                        </ul>
-                    `;
-                } else if (currentSection === 'climate') {
-                    modalContent.innerHTML += `
-                        <h2>🔥 Causes of Climate Change</h2>
-                        <ul>
-                            <li>Burning fossil fuels like coal, oil, and gas for energy.</li>
-                            <li>Deforestation for land and industry.</li>
-                            <li>Excessive emissions from vehicles, factories, and power plants.</li>
-                            <li>Unsustainable farming and waste.</li>
-                        </ul>
-                        <div class="section-title">🌍 Impacts of Climate Change</div>
-                        <ul>
-                            <li>More frequent storms, droughts, and heat waves.</li>
-                            <li>Rising sea levels threatening coastal communities.</li>
-                            <li>Disrupted agriculture and food supply.</li>
-                            <li>Warmer temperatures accelerating the spread of harmful bacteria.</li>
-                        </ul>
-                    `;
-                } else if (currentSection === 'biodiversity') {
-                    modalContent.innerHTML += `
-                        <h2>⭕ Causes of Biodiversity Loss</h2>
-                        <ul>
-                            <li>Land clearing for mining and energy production.</li>
-                            <li>Pollution destroying habitats and food sources.</li>
-                            <li>Overexploitation of natural resources without restoration efforts.</li>
-                        </ul>
-                        <div class="section-title">🌱 Impacts of Biodiversity Loss</div>
-                        <ul>
-                            <li>Ecosystem Collapse: Loss of essential species weakens food chains and disrupts nature's balance.</li>
-                            <li>Declining Natural Resources: Fewer fish, plants, and animals for food and medicine.</li>
-                            <li>Disrupted agriculture and food supply.</li>
-                            <li>Reduced Climate Resilience: Less biodiversity makes it harder for nature to adapt to climate change.</li>
-                        </ul>
-                    `;
-                }
-                
-                // Reattach close button handlers after updating content
-                attachCloseHandlers();
+            function setBackground(imagePath) {
+                body.style.background = `linear-gradient(rgba(0, 28, 46, 0.45), rgba(0, 28, 46, 0.60)), url('${imagePath}')`;
+                body.style.backgroundSize = 'cover';
+                body.style.backgroundPosition = 'center';
+                body.style.backgroundAttachment = 'fixed';
             }
 
             function hideAllCards() {
@@ -849,106 +904,95 @@ include 'inc/header.php';
                     card.style.display = 'none';
                     card.classList.remove('active');
                 });
+                // Reset TPC content to original when hiding cards
+                tpcCard.innerHTML = originalTpcContent;
+                // Reattach close button event listener
+                attachCloseButtonListeners();
             }
 
-            imageCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    const category = card.dataset.category;
-                    const targetCard = document.getElementById(`${category}Card`);
-                    
-                    if (targetCard.style.display === 'none') {
-                        hideAllCards();
-                        targetCard.style.display = 'block';
+            function attachCloseButtonListeners() {
+                closeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const card = button.closest('.content-card');
+                        card.classList.remove('active');
                         setTimeout(() => {
-                            targetCard.classList.add('active');
-                            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }, 10);
-                    } else {
-                        targetCard.classList.remove('active');
-                        setTimeout(() => {
-                            targetCard.style.display = 'none';
+                            card.style.display = 'none';
+                            setBackground(bgMap['tpc']);
+                            if (card === tpcCard) {
+                                tpcCard.innerHTML = originalTpcContent;
+                                attachCloseButtonListeners();
+                            }
                         }, 300);
+                    });
+                });
+            }
+
+            // Handle both image clicks, hovers, and button clicks
+            imageCards.forEach(card => {
+                const learnMoreBtn = card.querySelector('.learn-more-btn');
+                const howToHelpBtn = card.querySelector('.how-to-help-btn');
+                const category = card.getAttribute('data-category');
+
+                // Image click handler for background change
+                card.addEventListener('click', (e) => {
+                    if (e.target.closest('.button-container')) {
+                        return; // Don't process if clicking buttons
+                    }
+                    
+                    if (bgMap[category]) {
+                        setBackground(bgMap[category]);
                     }
                 });
-            });
 
-            closeButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const card = button.closest('.content-card');
-                    card.classList.remove('active');
-                    setTimeout(() => {
-                        card.style.display = 'none';
-                    }, 300);
+                // Mouse enter handler to close other cards
+                card.addEventListener('mouseenter', () => {
+                    hideAllCards();
+                    if (bgMap[category]) {
+                        setBackground(bgMap[category]);
+                    }
                 });
-            });
 
-            // Learn More button click handler
-            learnMoreBtn.addEventListener('click', () => {
-                showLearnMoreContent();
-                learnMoreModal.style.display = 'block';
-                setTimeout(() => learnMoreModal.classList.add('active'), 10);
-            });
+                // Learn More button click handler
+                if (learnMoreBtn) {
+                    learnMoreBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent image card click
+                        const targetCard = document.getElementById(`${category}Card`);
+                        
+                        if (bgMap[category]) {
+                            setBackground(bgMap[category]);
+                        }
+                        
+                        if (targetCard.style.display === 'none' || !targetCard.style.display) {
+                            hideAllCards();
+                            targetCard.style.display = 'block';
+                            setTimeout(() => {
+                                targetCard.classList.add('active');
+                                targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 10);
+                        }
+                    });
+                }
 
-            // How to Help button click handler
-            howToHelpBtn.addEventListener('click', () => {
-                howToHelpModal.style.display = 'block';
-                setTimeout(() => howToHelpModal.classList.add('active'), 10);
-            });
-
-            // Initial attachment of close handlers
-            attachCloseHandlers();
-
-            // Click outside modal to close
-            window.addEventListener('click', (e) => {
-                if (e.target.classList.contains('modal')) {
-                    e.target.classList.remove('active');
-                    setTimeout(() => {
-                        e.target.style.display = 'none';
-                    }, 300);
+                // How to Help button click handler
+                if (howToHelpBtn) {
+                    howToHelpBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // Prevent image card click
+                        
+                        hideAllCards();
+                        tpcCard.innerHTML = howToHelpContent;
+                        tpcCard.style.display = 'block';
+                        setTimeout(() => {
+                            tpcCard.classList.add('active');
+                            tpcCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            attachCloseButtonListeners();
+                        }, 10);
+                    });
                 }
             });
 
-            // Initialize with main content
-            updateContent('main');
-
-            // Position the button group downward, aligned with the bottom of the Biodiversity Loss image
-            function positionButtonGroup() {
-                const biolossImg = document.querySelector('.image-card[data-category="biodiversity"]');
-                const buttonGroup = document.querySelector('.button-group');
-                if (!biolossImg || !buttonGroup) return;
-                if (window.innerWidth <= 768) {
-                    // On mobile, let CSS handle it
-                    buttonGroup.style.opacity = '1';
-                    buttonGroup.style.pointerEvents = 'auto';
-                    return;
-                }
-                const rect = biolossImg.getBoundingClientRect();
-                const scrollY = window.scrollY || window.pageYOffset;
-                buttonGroup.style.top = (rect.bottom + scrollY) + 'px'; // perfectly aligned with the bottom
-                buttonGroup.style.opacity = '1';
-                buttonGroup.style.pointerEvents = 'auto';
-            }
-            window.addEventListener('resize', positionButtonGroup);
-            window.addEventListener('scroll', positionButtonGroup);
-            setTimeout(positionButtonGroup, 300);
-            positionButtonGroup();
-
-            // Accordion background change on hover
-            const bgMap = {
-                tpc: "url('../assets/images/tpc-general.jpg')",
-                pollution: "url('../assets/images/pollution1.jpg')",
-                climate: "url('../assets/images/climate_change1.jpg')",
-                biodiversity: "url('../assets/images/bioloss1.jpg')"
-            };
-            imageCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    const cat = card.getAttribute('data-category');
-                    if(bgMap[cat]) body.style.backgroundImage = bgMap[cat];
-                });
-                card.addEventListener('mouseleave', function() {
-                    body.style.backgroundImage = bgMap['tpc'];
-                });
-            });
+            // Initial setup
+            attachCloseButtonListeners();
+            setBackground(bgMap['tpc']);
         });
     </script>
 </body>

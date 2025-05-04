@@ -1,4 +1,8 @@
-<?php include 'inc/header.php'; ?>
+<?php
+session_start();
+include 'inc/header.php';
+include '../auth/user_only.php';
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -356,16 +360,13 @@
         }
       });
     });
-
     // Dark/Light mode detection
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
       const body = document.body;
       if (localStorage.getItem('mode') === 'light') {
         body.classList.add('light-mode');
       }
     });
   </script>
-
 </body>
-
 </html>

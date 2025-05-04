@@ -26,6 +26,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['title']) && isset($_PO
     }
   }
 
+  // Process uploaded videos
+  $uploaded_videos = [];
+
+  if (isset($_FILES['videos']) && !empty($_FILES['videos']['name'][0])) {
+    $upload_dir = 'uploads/';
+
+    foreach ($_FILES['videos']['tmp_name'] as $key => $tmp_name) {
+      $file_name = $_FILES['videos']['name'][$key];
+      $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+      $new_file_name = uniqid() . '_video.' . $file_ext;
+
+      if (move_uploaded_file($tmp_name, $upload_dir . $new_file_name)) {
+        $uploaded_videos[] = $new_file_name;
+      }
+    }
+  }
+
   // Create new post with current time
   $new_post = [
     'author' => 'Juan Dela Cruz', // sample user
@@ -34,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['title']) && isset($_PO
     'title' => $title,
     'content' => $content,
     'images' => $uploaded_images,
+    'videos' => $uploaded_videos,
     'topic' => $topic,
     'likes' => 0
   ];
@@ -133,6 +151,56 @@ include 'inc/header.php';
 
     .post-images.single-image img {
       max-height: 500px;
+    }
+
+    /* Video CSS */
+    .post-videos {
+      margin-bottom: 15px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 8px;
+    }
+
+    .post-videos.single-video {
+      grid-template-columns: 1fr;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 0;
+      padding-bottom: 75%;
+      overflow: hidden;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .video-container video {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .video-container:hover video {
+      transform: scale(1.03);
+    }
+
+    .video-play-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 48px;
+      opacity: 0.8;
+      z-index: 2;
+      transition: opacity 0.3s;
+    }
+
+    .video-container:hover .video-play-icon {
+      opacity: 1;
     }
 
     .post-footer {
@@ -280,7 +348,8 @@ include 'inc/header.php';
       transform: scale(1.03);
     }
 
-    .more-images-overlay {
+    .more-images-overlay,
+    .more-videos-overlay {
       position: absolute;
       top: 0;
       left: 0;
@@ -327,6 +396,13 @@ include 'inc/header.php';
     }
 
     .lightbox-image {
+      max-width: 100%;
+      max-height: 80vh;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+    
+    .lightbox-video {
       max-width: 100%;
       max-height: 80vh;
       object-fit: contain;
@@ -402,8 +478,37 @@ include 'inc/header.php';
       color: var(--moonstone);
     }
 
+    .media-tab {
+      display: inline-block;
+      padding: 8px 12px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      background-color: var(--rich-black);
+      color: var(--silver);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .media-tab.active {
+      background-color: var(--moonstone);
+      color: white;
+    }
+
+    .media-content {
+      display: none;
+    }
+
+    .media-content.active {
+      display: block;
+    }
+
     .image-container:hover{
       opacity: 1;
+    }
+
+    .media-section {
+      margin-bottom: 20px;
     }
   </style>
 
@@ -421,6 +526,8 @@ include 'inc/header.php';
 
   foreach ($posts as $post) :
     $post_id = md5($post['title'] . $post['post_time']);
+    $has_images = !empty($post['images']);
+    $has_videos = !empty($post['videos']);
   ?>
     <div class="post-card">
       <!--Author section at the top of the post -->
@@ -435,26 +542,67 @@ include 'inc/header.php';
       <!--Content of the post -->
       <div class="post-header"><?= htmlspecialchars($post['title']) ?></div>
       <div class="post-content"><?= htmlspecialchars($post['content']) ?></div>
-      <?php if (!empty($post['images'])) : ?>
-        <div class="post-images <?= count($post['images']) === 1 ? 'single-image' : '' ?>">
-          <?php
-          $total_images = count($post['images']);
-          $display_count = min(4, $total_images);
-          $remaining = $total_images - $display_count;
 
-          for ($i = 0; $i < $display_count; $i++) :
-            $image = $post['images'][$i];
-            $image_id = md5($post_id . $i);
-          ?>
-            <div class="image-container" onclick="openLightbox('<?= $post_id ?>', <?= $i ?>)">
-              <img src="uploads/<?= htmlspecialchars($image) ?>" alt="Post image">
-              <?php if ($i === 3 && $remaining > 0) : ?>
-                <div class="more-images-overlay">+<?= $remaining ?></div>
-              <?php endif; ?>
-            </div>
-          <?php endfor; ?>
+      <?php if ($has_images || $has_videos): ?>
+      <div class="media-section">
+        <?php if ($has_images && $has_videos): ?>
+        <div class="media-tabs">
+          <div class="media-tab active" data-tab="images-<?= $post_id ?>">Images</div>
+          <div class="media-tab" data-tab="videos-<?= $post_id ?>">Videos</div>
         </div>
+        <?php endif; ?>
+
+        <?php if ($has_images): ?>
+        <div class="media-content active" id="images-<?= $post_id ?>">
+          <div class="post-images <?= count($post['images']) === 1 ? 'single-image' : '' ?>">
+          <?php
+            $total_images = count($post['images']);
+            $display_count = min(4, $total_images);
+            $remaining = $total_images - $display_count;
+
+            for ($i = 0; $i < $display_count; $i++) :
+              $image = $post['images'][$i];
+              $image_id = md5($post_id . $i);
+          ?>
+              <div class="image-container" onclick="openMediaLightbox('<?= $post_id ?>', <?= $i ?>, 'image')">
+                <img src="uploads/<?= htmlspecialchars($image) ?>" alt="Post image">
+                <?php if ($i === 3 && $remaining > 0) : ?>
+                  <div class="more-images-overlay">+<?= $remaining ?></div>
+                <?php endif; ?>
+              </div>
+            <?php endfor; ?>
+          </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($has_videos): ?>
+        <div class="media-content <?= !$has_images ? 'active' : '' ?>" id="videos-<?= $post_id ?>">
+          <div class="post-videos <?= count($post['videos']) === 1 ? 'single-video' : '' ?>">
+          <?php
+            $total_videos = count($post['videos']);
+            $display_count = min(4, $total_videos);
+            $remaining = $total_videos - $display_count;
+
+            for ($i = 0; $i < $display_count; $i++) :
+              $video = $post['videos'][$i];
+              $video_id = md5($post_id . $i . 'video');
+          ?>
+              <div class="video-container" onclick="openMediaLightbox('<?= $post_id ?>', <?= $i ?>, 'video')">
+                <video src="uploads/<?= htmlspecialchars($video) ?>" preload="metadata"></video>
+                <div class="video-play-icon">
+                  <i class="fas fa-play-circle"></i>
+                </div>
+                <?php if ($i === 3 && $remaining > 0) : ?>
+                  <div class="more-videos-overlay">+<?= $remaining ?></div>
+                <?php endif; ?>
+              </div>
+            <?php endfor; ?>
+          </div>
+        </div>
+        <?php endif; ?>
+      </div>
       <?php endif; ?>
+
       <div class="post-footer">
         <button id="like-btn-<?= $post_id ?>" class="icon-btn" onclick="likePost('<?= $post_id ?>')">
           <i id="like-icon-<?= $post_id ?>" class="fa-regular fa-heart"></i>
@@ -478,27 +626,30 @@ include 'inc/header.php';
   <?php endforeach; ?>
 </div>
 
-<!-- Image Lightbox Gallery -->
+<!-- Media Lightbox Gallery -->
 <div class="lightbox-overlay" id="lightbox-overlay">
   <div class="lightbox-container">
     <button class="lightbox-close" onclick="closeLightbox()">
       <i class="fas fa-times"></i>
     </button>
     
-    <img src="" alt="Full size image" id="lightbox-image" class="lightbox-image">
+    <!-- For images -->
+    <img src="" alt="Full size image" id="lightbox-image" class="lightbox-image" style="display: none;">
+    
+    <!-- For videos -->
+    <video id="lightbox-video" class="lightbox-video" controls style="display: none;"></video>
     
     <div class="lightbox-nav">
-      <button onclick="navigateImage(-1)">
+      <button onclick="navigateMedia(-1)">
         <i class="fas fa-chevron-left"></i>
       </button>
-      <button onclick="navigateImage(1)">
+      <button onclick="navigateMedia(1)">
         <i class="fas fa-chevron-right"></i>
       </button>
     </div>
     
     <div class="lightbox-footer">
       <span class="lightbox-counter" id="lightbox-counter">1 of 5</span>
-      
     </div>
   </div>
 </div>
@@ -649,13 +800,8 @@ include 'inc/header.php';
     document.getElementById(`comment-textarea-${postId}`).focus();
   }
 
-  function commentOnImage(imageId, event) {
-    event.stopPropagation(); // Prevent opening lightbox
-    // You could implement a separate image comment system or integrate it with the post comments
-    alert("Image comment feature coming soon!");
-  }
-
   const postImagesData = {};
+  const postVideosData = {};
   
   <?php foreach ($posts as $post): ?>
   <?php if (!empty($post['images'])): ?>
@@ -665,23 +811,55 @@ include 'inc/header.php';
     <?php endforeach; ?>
   ];
   <?php endif; ?>
+  
+  <?php if (!empty($post['videos'])): ?>
+  postVideosData['<?= md5($post['title'] . $post['post_time']) ?>'] = [
+    <?php foreach ($post['videos'] as $video): ?>
+    'uploads/<?= htmlspecialchars($video) ?>',
+    <?php endforeach; ?>
+  ];
+  <?php endif; ?>
   <?php endforeach; ?>
 
-  // Lightbox Gallery
-  let currentPostId = null;
-  let currentImageIndex = 0;
-  let currentPostImages = [];
+  // Tabs switching functionality
+  document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('media-tab')) {
+      const tabId = event.target.dataset.tab;
+      const tabGroup = event.target.closest('.media-tabs');
+      
+      const allTabs = tabGroup.querySelectorAll('.media-tab');
+      allTabs.forEach(tab => tab.classList.remove('active'));
+    
+      const postId = tabId.split('-')[1]; // Extract post ID from tab ID
+      const allContents = document.querySelectorAll(`#images-${postId}, #videos-${postId}`);
+      allContents.forEach(content => content.classList.remove('active'));
+      
+      // Activate clicked tab and its content
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+  });
 
-  function openLightbox(postId, imageIndex) {
+  // Lightbox Gallery with support for images and videos
+  let currentPostId = null;
+  let currentMediaIndex = 0;
+  let currentMediaType = 'image'; // 'image' or 'video'
+  let currentMedia = [];
+
+  function openMediaLightbox(postId, mediaIndex, mediaType) {
     currentPostId = postId;
-    currentImageIndex = imageIndex;
+    currentMediaIndex = mediaIndex;
+    currentMediaType = mediaType;
     
-    // Use the complete array of images stored in our data object
-    currentPostImages = postImagesData[postId] || [];
+    // Choose the appropriate media array based on type
+    if (mediaType === 'image') {
+      currentMedia = postImagesData[postId] || [];
+    } else {
+      currentMedia = postVideosData[postId] || [];
+    }
     
-    // Display the current image
-    document.getElementById('lightbox-image').src = currentPostImages[currentImageIndex];
-    document.getElementById('lightbox-counter').textContent = `${currentImageIndex + 1} of ${currentPostImages.length}`;
+    // Display the current media
+    updateLightboxMedia();
     
     // Show lightbox
     document.getElementById('lightbox-overlay').classList.add('active');
@@ -690,27 +868,54 @@ include 'inc/header.php';
     document.body.style.overflow = 'hidden';
   }
 
+  function updateLightboxMedia() {
+    const lightboxImage = document.getElementById('lightbox-image');
+    const lightboxVideo = document.getElementById('lightbox-video');
+    
+    // Update counter
+    document.getElementById('lightbox-counter').textContent = `${currentMediaIndex + 1} of ${currentMedia.length}`;
+    
+    lightboxImage.style.display = 'none';
+    lightboxVideo.style.display = 'none';
+    
+    if (currentMediaType === 'image') {
+      lightboxImage.src = currentMedia[currentMediaIndex];
+      lightboxImage.style.display = 'block';
+    } else {
+      
+      lightboxVideo.src = currentMedia[currentMediaIndex];
+      lightboxVideo.style.display = 'block';
+      lightboxVideo.currentTime = 0; // Reset video to beginning
+      lightboxVideo.play();
+    }
+  }
+
   function closeLightbox() {
     document.getElementById('lightbox-overlay').classList.remove('active');
     document.body.style.overflow = '';
+    
+    // Pause video if active
+    const lightboxVideo = document.getElementById('lightbox-video');
+    if (lightboxVideo.style.display !== 'none') {
+      lightboxVideo.pause();
+    }
   }
 
-  function navigateImage(direction) {
-    currentImageIndex += direction;
+  function navigateMedia(direction) {
+    currentMediaIndex += direction;
     
     // Handle wrapping around
-    if (currentImageIndex < 0) {
-      currentImageIndex = currentPostImages.length - 1;
-    } else if (currentImageIndex >= currentPostImages.length) {
-      currentImageIndex = 0;
+    if (currentMediaIndex < 0) {
+      currentMediaIndex = currentMedia.length - 1;
+    } else if (currentMediaIndex >= currentMedia.length) {
+      currentMediaIndex = 0;
     }
     
-    // Update image and counter
-    document.getElementById('lightbox-image').src = currentPostImages[currentImageIndex];
-    document.getElementById('lightbox-counter').textContent = `${currentImageIndex + 1} of ${currentPostImages.length}`;
+    // Update displayed media
+    updateLightboxMedia();
   }
 
-  // Close lightbox when clicking outside of image
+  // Close lightbox when clicking outside of media
   document.getElementById('lightbox-overlay').addEventListener('click', function(event) {
     if (event.target === this) {
       closeLightbox();
@@ -726,11 +931,21 @@ include 'inc/header.php';
         closeLightbox();
         break;
       case 'ArrowLeft':
-        navigateImage(-1);
+        navigateMedia(-1);
         break;
       case 'ArrowRight':
-        navigateImage(1);
+        navigateMedia(1);
         break;
     }
   });
+
+  // Dark/Light mode detection
+  document.addEventListener("DOMContentLoaded", function() {
+    const body = document.body;
+    if (localStorage.getItem('mode') === 'light') {
+      body.classList.add('light-mode');
+    }
+  });
 </script>
+</body>
+</html>

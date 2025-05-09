@@ -136,8 +136,9 @@ footer {
 }
 </style>
 </head>
+  <?php include 'inc/head.php'; ?>
     <body>
-
+    <?php include 'inc/header.php'; ?>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container">

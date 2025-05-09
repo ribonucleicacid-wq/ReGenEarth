@@ -2,6 +2,9 @@
 session_start();
 include "inc/navigation.php";
 include '../auth/admin_only.php';
+require_once '../src/db_connection.php';
+
+$_SESSION['just_logged_in'] = false;
 ?>
 
 <!DOCTYPE html>
@@ -11,8 +14,7 @@ include '../auth/admin_only.php';
     <meta charset="UTF-8">
     <title>User Management - ReGenEarth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
-    <link rel="shortcut icon" href="uploads/logo.png" type="image/png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+    <link rel="shortcut icon" href="../uploads/logo.png" type="image/png" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
 
     <style>
@@ -57,19 +59,19 @@ include '../auth/admin_only.php';
         .table {
             background-color: var(--rich-black);
             color: var(--silver);
-            border-color: var(--moonstone);
+            border-color: var(--silver);
         }
 
         .table thead th {
-            background-color: var(--moonstone);
-            color: white;
-            border-color: var(--moonstone);
+            background-color: var(----silver);
+            color: var(--silver);
+            border-color: var(--silver);
         }
 
         .table td,
         .table th {
             vertical-align: middle !important;
-            border-color: var(--moonstone);
+            border-color: var(--silver);
         }
 
         .btn-custom {
@@ -113,6 +115,7 @@ include '../auth/admin_only.php';
         }
 
         .main {
+            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -122,75 +125,214 @@ include '../auth/admin_only.php';
 
         td {
             font-size: 12px;
-            color: var(--moonstone)
+            color: var(--silver)
+        }
+
+        .search-container {
+            margin-bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-bar {
+            width: 80%;
+            max-width: 500px;
+            padding: 10px;
+            border-radius: 25px;
+            border: 1px solid var(--silver);
+            background-color: #fff;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: var(--moonstone);
         }
     </style>
 </head>
 
 <body class="dashboard">
     <div class="main">
-        <h2 class="mb-4">User Management</h2>
+        <h2 class="mb-4 text-center">User Management</h2>
+
+        <!-- Search Bar -->
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-bar"
+                placeholder="Search Users by Username, Email, Bio, or Date">
+        </div>
+        <div class="text-right mb-3 w-100">
+            <button class="btn btn-success btn-add" id="addUserBtn">
+                <i class="fas fa-user-plus"></i> Add User
+            </button>
+        </div>
 
         <div class="table-responsive">
-            <table class="table table-bordered table-hover">
+            <table class="table table-bordered table-hover" id="userTable">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Username</th>
                         <th>Email</th>
-                        <th>Role</th>
-                        <th style="width: 160px;">Actions</th>
+                        <th>Bio</th>
+                        <th>Created At</th>
+                        <th>Updated At</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Static example row -->
-                    <tr>
-                        <td>1</td>
-                        <td>admin</td>
-                        <td>admin@example.com</td>
-                        <td>Administrator</td>
-                        <td>
-                            <button class="btn btn-edit btn-custom" onclick="editUser(this)">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-delete btn-custom" onclick="deleteUser(this)">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </td>
-                    </tr>
-                    <!-- Add more rows dynamically here -->
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
 
-        <div class="mt-3">
-            <button class="btn btn-add btn-custom" onclick="addUser()">
-                <i class="fas fa-user-plus"></i> Add User
-            </button>
+        <!-- Pagination placeholder -->
+        <nav>
+            <ul class="pagination justify-content-center" id="pagination"></ul>
+        </nav>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <form id="userForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">User Form</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="user_id" id="user_id" />
+                        <input type="hidden" name="action" id="formAction" value="add" />
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" name="username" id="username" class="form-control" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" name="email" id="email" class="form-control" required />
+                        </div>
+                        <div class="form-group" id="passwordGroup">
+                            <label>Password</label>
+                            <input type="password" name="password" id="password" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select name="role" id="role" class="form-control">
+                                <option value="user">User</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Bio</label>
+                            <textarea name="bio" id="bio" class="form-control"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save User</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        function deleteUser(button) {
-            const row = button.closest("tr");
-            const username = row.children[1].textContent;
-            if (confirm(`Are you sure you want to delete user "${username}"?`)) {
-                row.remove();
-                // TODO: Connect to backend to delete
+        $(document).ready(function () {
+            loadUsers();
+
+            function loadUsers(searchTerm = '') {
+                const action = searchTerm.trim() !== '' ? "searchUser" : "list";
+                const userRole = $("#userRoleFilter").val() || "user";
+
+                $.post("user_actions.php", { action: action, searchTerm: searchTerm, userRole: userRole }, function (data) {
+                    let users;
+                    try {
+                        users = JSON.parse(data);
+                    } catch (error) {
+                        console.error("Failed to parse JSON:", error);
+                        return;
+                    }
+
+                    const tbody = $("#userTable tbody").empty();
+                    if (users.length === 0) {
+                        tbody.append(`<tr><td colspan="7" class="text-center">No users found.</td></tr>`);
+                    } else {
+                        users.forEach(user => {
+                            tbody.append(`
+                        <tr>
+                            <td>${user.user_id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.bio}</td>
+                            <td>${user.created_at}</td>
+                            <td>${user.updated_at}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning editUser" data-id="${user.user_id}">Edit</button>
+                                <button class="btn btn-sm btn-danger deleteUser" data-id="${user.user_id}">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                        });
+                    }
+                });
             }
-        }
 
-        function editUser(button) {
-            const row = button.closest("tr");
-            const username = row.children[1].textContent;
-            alert(`Edit user "${username}" - feature not implemented yet.`);
-            // TODO: Add modal or redirect for editing
-        }
+            // Search input live typing
+            $("#searchInput").on("input", function () {
+                const searchTerm = $(this).val().toLowerCase();
+                loadUsers(searchTerm);
 
-        function addUser() {
-            alert("Add user feature not implemented yet.");
-            // TODO: Show form or redirect to user_create.php
-        }
+            });
+
+            // Handle form submission
+            $("#userForm").submit(function (e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post("user_actions.php", formData, function (response) {
+                    $("#addUserModal").modal("hide");
+                    loadUsers();
+                });
+            });
+
+            // Edit user button click
+            $(document).on("click", ".editUser", function () {
+                const userId = $(this).data("id");
+                $.post("user_actions.php", { action: "get", user_id: userId }, function (data) {
+                    const user = JSON.parse(data);
+                    $("#user_id").val(user.user_id);
+                    $("#username").val(user.username);
+                    $("#email").val(user.email);
+                    $("#bio").val(user.bio);
+                    $("#formAction").val("update");
+
+                    // Clear password for security & allow editing
+                    $("#password").val("").prop("readonly", false);
+                    $("#passwordGroup").show();
+
+                    $("#addUserModal").modal("show");
+                });
+            });
+
+
+            // Delete user
+            $(document).on("click", ".deleteUser", function () {
+                const userId = $(this).data("id");
+                if (confirm("Delete this user?")) {
+                    $.post("user_actions.php", { action: "delete", user_id: userId }, function () {
+                        loadUsers();
+                    });
+                }
+            });
+
+            $("#addUserBtn").on("click", function () {
+                $("#formAction").val("add");
+                $("#user_id").val("");
+                $("#username, #email, #bio").val("");
+                $("#password").val("ReGenEarth2025").prop("readonly", true);
+                $("#passwordGroup").show();
+                $("#addUserModal").modal("show");
+            });
+
+        });
     </script>
 </body>
 

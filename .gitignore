@@ -1,5 +1,4 @@
 # Custom exclusions
 settings.json
-header.php
-text.php
-test.php
+tests.php
+.vscode

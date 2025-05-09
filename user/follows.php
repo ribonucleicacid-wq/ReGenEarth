@@ -1,405 +1,363 @@
-<?php 
-session_start();
-include 'inc/header.php'; 
-include '../auth/user_only.php';
-?>
+<?php include 'inc/header.php'; ?>
 <?php
+
 $followedUsers = [
-  [
-    'fullname' => 'Noe',
-    'profile_pic' => 'https://i.pravatar.cc/50?img=1'
-  ],
-  [
-    'fullname' => 'Jasmin',
-    'profile_pic' => 'https://i.pravatar.cc/50?img=3'
-  ],
-  [
-    'fullname' => 'Daniel',
-    'profile_pic' => 'https://i.pravatar.cc/50?img=2'
-  ]
+    [
+        'id' => 1,
+        'username' => 'Noe',
+        'profile_pic' => 'https://i.pravatar.cc/50?img=1'
+    ],
+    [
+        'id' => 2,
+        'username' => 'Jasmin',
+        'profile_pic' => 'https://i.pravatar.cc/50?img=3'
+    ],
+    [
+        'id' => 3,
+        'username' => 'Daniel',
+        'profile_pic' => 'https://i.pravatar.cc/50?img=2'
+    ]
 ];
 
 $followers = [
-  [
-    'fullname' => 'John Lorcan',
-    'profile_pic' => 'https://i.pravatar.cc/50?img=5'
-  ],
-  [
-    'fullname' => 'Dianne',
-    'profile_pic' => 'https://i.pravatar.cc/50?img=4'
-  ]
+    [
+        'id' => 4,
+        'username' => 'John Lorcan',
+        'profile_pic' => 'https://i.pravatar.cc/50?img=4'
+    ],
+    [
+        'id' => 5,
+        'username' => 'Dianne',
+        'profile_pic' => 'https://i.pravatar.cc/50?img=5'
+    ]
 ];
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Follows</title>
-  <link rel="stylesheet" href="../assets/css/style.css">
-  
-  <style>
-:root {
-  --brunswick-green: #234F38;
-  --prussian-blue: #132F43;
-  --silver: #CACFD3;
-  --taupe-gray: #999A9C;
-  --rich-black: #0B1A26;
-}
+    <meta charset="UTF-8">
+    <title>Follows</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <style>
+        :root {
+            --brunswick-green: #234F38;
+            --prussian-blue: #132F43;
+            --silver: #CACFD3;
+            --taupe-gray: #999A9C;
+            --rich-black: #0B1A26;
+        }
 
-.body {
-  background-color: var(--rich-black);
-  color: var(--silver);
-  font-family: 'Poppins', sans-serif;
-}
+        body {
+            background-color: var(--rich-black);
+            color: var(--silver);
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
 
-.body, html {
-  height: 100%;
-  margin: 0;
-}
+        .center-wrapper {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-.center-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 50vh;
-  padding-top: 0px; 
-}
+        .follow-page {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
 
-.follow-page {
-  width: 100%;
-  max-width: 600px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-  padding: 30px;
-  backdrop-filter: blur(8px);
-  margin-top: 0px;
-  display: none;
-}
+        .segmented-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            border-radius: 10px;
+        }
 
-.follow-page.active {
-  display: block;
-}
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: none;
+            border: none;
+            color: var(--silver);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
 
-.follow-page h2 {
-  color: white;
-  font-weight: 600;
-  margin-bottom: 20px;
-  text-align: center;
-}
+        .tab.active {
+            background-color: var(--brunswick-green);
+            color: white;
+        }
 
-.user-card {
-  display: flex;
-  align-items: center;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 15px 20px;
-  margin-bottom: 15px;
-  transition: box-shadow 0.3s;
-  gap: 15px;
-}
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
 
-.user-select {
-  width: 14px;
-  height: 14px;
-  border: 2px solid #ccc;
-  border-radius: 50%;
-  margin-right: 15px;
-  cursor: pointer;
-  transition: background 0.3s, border 0.3s;
-}
+        #searchInput {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--silver);
+        }
 
-.user-select.selected {
-  background-color: var(--brunswick-green);
-  border-color: var(--brunswick-green);
-}
+        .search-btn {
+            padding: 10px 20px;
+            background-color: var(--brunswick-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
 
-.user-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
+        .user-card {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            transition: box-shadow 0.3s;
+        }
 
-.user-card img {
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 15px;
-}
+        .user-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
 
-.user-info {
-  flex: 1;
-  color: white;
-}
+        .user-card img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+        }
 
-.user-info strong {
-  display: block;
-  font-size: 16px;
-}
+        .user-info {
+            flex: 1;
+        }
 
-.user-info small {
-  font-size: 13px;
-  color: #ccc;
-}
+        .user-info strong {
+            color: var(--silver);
+            font-size: 1.1em;
+        }
 
-.button.unfollow {
-  background-color: #f44336;
-  color: white;
-  padding: 8px 20px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  font-size: 14px;
-  font-weight: 500;
-}
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
 
-.button.unfollow:hover {
-  background-color: #d32f2f;
-}
+        .button.follow {
+            background-color: var(--brunswick-green);
+            color: white;
+        }
 
-.button.follow {
-  background-color: var(--brunswick-green);
-  color: white;
-  padding: 8px 20px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  font-size: 14px;
-  font-weight: 500;
-}
+        .button.unfollow {
+            background-color: var(--taupe-gray);
+            color: var(--rich-black);
+        }
 
-.button.follow:hover {
-  background-color: var(--prussian-blue);
-  color: white;
-}
+        .button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
 
-.search-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  gap: 10px;
-}
+        .success-message {
+            background-color:rgb(81, 105, 82);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
 
-#searchInput {
-  padding: 10px 15px;
-  width: 60%;
-  max-width: 300px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  font-size: 14px;
-}
+        .error-message {
+            background-color: #f44336;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
 
-#searchInput::placeholder {
-  color: #bbb;
-}
+        .user-card {
+            transition: all 0.3s ease;
+        }
 
-.search-btn {
-  padding: 10px 18px;
-  background-color: var(--prussian-blue);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
+        .user-card.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
 
-.search-btn:hover {
-  background-color: var(--brunswick-green);
-  color: white;
-}
+        .tab-content {
+            display: none;
+        }
 
-.segmented-tabs {
-  display: flex;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 999px;
-  padding: 4px;
-  width: fit-content;
-  margin: 20px auto 10px;
-}
-
-.segmented-tabs .tab {
-  background: transparent;
-  border: none;
-  color: #ccc;
-  padding: 8px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background 0.3s, color 0.3s;
-}
-
-.segmented-tabs .tab.active {
-  background-color: var(--brunswick-green);
-  color: white;
-}
-
-.segmented-tabs .tab:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.light-mode {
-  --brunswick-green: #234F38;
-  --prussian-blue: #132F43;
-  --silver: #CACFD3;
-  --taupe-gray: #999A9C;
-  --rich-black: #FFFFFF;
-}
-
-.light-mode .follow-page {
-  background: rgba(202, 207, 211, 0.4);
-  color: var(--rich-black);
-}
-
-.light-mode .user-card {
-  background-color: rgba(202, 207, 211, 0.6);
-  color: var(--rich-black);
-}
-
-.light-mode .user-select {
-  border-color: var(--taupe-gray);
-}
-
-.light-mode .user-select.selected {
-  background-color: var(--brunswick-green);
-  border-color: var(--brunswick-green);
-}
-
-.light-mode .user-card:hover {
-  box-shadow: 0 4px 8px rgba(11, 26, 38, 0.2);
-}
-
-.light-mode .user-info {
-  color: var(--rich-black);
-}
-
-.light-mode .user-info strong {
-  color: var(--prussian-blue);
-}
-
-.light-mode .user-info small {
-  color: var(--taupe-gray);
-}
-
-.light-mode .button.follow:hover {
-  background-color: var(--prussian-blue);
-  color: white;
-}
-
-.light-mode #searchInput {
-  background-color: var(--silver);
-  color: var(--rich-black);
-  border: 1px solid var(--taupe-gray);
-}
-
-.light-mode #searchInput::placeholder {
-  color: var(--taupe-gray);
-}
-
-.light-mode .search-btn {
-  background-color: var(--brunswick-green);
-  color: white;
-}
-
-.light-mode .search-btn:hover {
-  background-color: var(--prussian-blue);
-  color: white;
-}
-
-.light-mode .segmented-tabs {
-  background-color: rgba(202, 207, 211, 0.5);
-}
-
-.light-mode .segmented-tabs .tab {
-  color: var(--prussian-blue);
-}
-
-.light-mode .segmented-tabs .tab.active {
-  background-color: var(--brunswick-green);
-  color: white;
-}
-
-.light-mode .segmented-tabs .tab:hover {
-  background-color: rgba(35, 79, 56, 0.2);
-  color: var(--rich-black);
-}
-</style>
+        .tab-content.active {
+            display: block;
+        }
+    </style>
 </head>
+<body class="body">
+    <div class="center-wrapper">
+        <div class="follow-page active">
+            <div class="segmented-tabs">
+                <button class="tab active" data-tab="following">Following</button>
+                <button class="tab" data-tab="followers">Followers</button>
+            </div>
 
-<body>
-<div class="search-container">
-  <input type="text" id="searchInput" placeholder="Search...">
-  <button class="button search-btn">Search</button>
-</div>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search users...">
+                <button class="search-btn">Search</button>
+            </div>
 
+            <div id="messageContainer"></div>
 
-  <div class="segmented-tabs">
-    <button class="tab active" onclick="showTab('following')">Following</button>
-    <button class="tab" onclick="showTab('followers')">Followers</button>
-</div>
+            <!-- Following Tab -->
+            <div class="tab-content active" id="following">
+                <h2>Following</h2>
+                <div id="followingList">
+                    <?php foreach ($followedUsers as $user): ?>
+                        <div class="user-card" data-user-id="<?php echo $user['id']; ?>">
+                            <img src="<?php echo $user['profile_pic']; ?>" alt="Profile">
+                            <div class="user-info">
+                                <strong><?php echo htmlspecialchars($user['username']); ?></strong>
+                            </div>
+                            <button class="button unfollow" onclick="toggleFollow(this, <?php echo $user['id']; ?>, 'unfollow')">Unfollow</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
 
-<div class="center-wrapper">
-
-  <div class="follow-page active" id="following">
-    <?php foreach ($followedUsers as $user): ?>
-      <div class="user-card">
-
-        <img src="<?= $user['profile_pic'] ?>" alt="Profile Pic">
-        <div class="user-info">
-          <strong><?= htmlspecialchars($user['fullname']) ?></strong>
+            <!-- Followers Tab -->
+            <div class="tab-content" id="followers">
+                <h2>Followers</h2>
+                <div id="followersList">
+                    <?php foreach ($followers as $user): ?>
+                        <div class="user-card" data-user-id="<?php echo $user['id']; ?>">
+                            <img src="<?php echo $user['profile_pic']; ?>" alt="Profile">
+                            <div class="user-info">
+                                <strong><?php echo htmlspecialchars($user['username']); ?></strong>
+                            </div>
+                            <?php if (!in_array($user['id'], array_column($followedUsers, 'id'))): ?>
+                                <button class="button follow" onclick="toggleFollow(this, <?php echo $user['id']; ?>, 'follow')">Follow</button>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
-        <button class="button unfollow">Unfollow</button>
-      </div>
-    <?php endforeach; ?>
-  </div>
+    </div>
 
-<!--followers-->
+    <script>
+        // Store followed users in localStorage
+        let followedUsers = <?php echo json_encode(array_column($followedUsers, 'id')); ?>;
+        
+        // Function to show message
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = `<div class="${type}-message">${message}</div>`;
+            messageContainer.querySelector(`.${type}-message`).style.display = 'block';
+            setTimeout(() => {
+                messageContainer.querySelector(`.${type}-message`).style.display = 'none';
+            }, 3000);
+        }
 
-  <div class="follow-page" id="followers">
-    <?php foreach ($followers as $user): ?>
-      <div class="user-card">
+        // Function to create user card HTML
+        function createUserCard(userId, username, profilePic, isFollowing) {
+            return `
+                <div class="user-card" data-user-id="${userId}">
+                    <img src="${profilePic}" alt="Profile">
+                    <div class="user-info">
+                        <strong>${username}</strong>
+                    </div>
+                    <button class="button ${isFollowing ? 'unfollow' : 'follow'}" 
+                            onclick="toggleFollow(this, ${userId}, '${isFollowing ? 'unfollow' : 'follow'}')">
+                        ${isFollowing ? 'Unfollow' : 'Follow'}
+                    </button>
+                </div>
+            `;
+        }
 
-        <img src="<?= $user['profile_pic'] ?>" alt="Profile Pic">
-        <div class="user-info">
-          <strong><?= htmlspecialchars($user['fullname']) ?></strong>
-        </div>
-        <button class="button follow">Follow</button>
-      </div>
-    <?php endforeach; ?>
-  </div>
-</div> 
-<script>
-  function toggleTheme() {
-    document.body.classList.toggle('light-mode');
-  }
-</script>
+        // Function for follow at unfollow
+        function toggleFollow(button, userId, action) {
+            const userCard = button.closest('.user-card');
+            const username = userCard.querySelector('.user-info strong').textContent;
+            const profilePic = userCard.querySelector('img').src;
+            
+            if (action === 'follow') {
+                // Add to followed 
+                followedUsers.push(userId);
+                
+                // Add to Following 
+                const followingList = document.getElementById('followingList');
+                followingList.insertAdjacentHTML('beforeend', createUserCard(userId, username, profilePic, true));
+                
+                // Update button 
+                button.textContent = 'Unfollow';
+                button.className = 'button unfollow';
+                button.onclick = function() { toggleFollow(this, userId, 'unfollow'); };
+                
+                showMessage(`Successfully followed ${username}!`, 'success');
+            } else {
+                // Remove from followed users
+                followedUsers = followedUsers.filter(id => id !== userId);
+                
+                // Remove from Following tab
+                const followingList = document.getElementById('followingList');
+                const cardToRemove = followingList.querySelector(`[data-user-id="${userId}"]`);
+                if (cardToRemove) {
+                    cardToRemove.classList.add('fade-out');
+                    setTimeout(() => cardToRemove.remove(), 300);
+                }
+                
+                // Update button in current view
+                button.textContent = 'Follow';
+                button.className = 'button follow';
+                button.onclick = function() { toggleFollow(this, userId, 'follow'); };
+                
+                showMessage(`Unfollowed ${username}`, 'success');
+            }
+        }
 
+        // Tab switching functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and show corresponding content
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
 
-<!-- Tab toggle script -->
-<script>
-  function showTab(tabId) {
-    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.follow-page').forEach(page => page.classList.remove('active'));
-
-    document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
-    document.getElementById(tabId).classList.add('active');
-  }
-
-  document.querySelectorAll('.user-select').forEach(dot => {
-    dot.addEventListener('click', () => {
-      dot.classList.toggle('selected');
-    });
-  });
-
-
-</script>
-
+        // Search functionality
+        document.querySelector('.search-btn').addEventListener('click', () => {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const currentTab = document.querySelector('.tab.active').dataset.tab;
+            const userCards = document.querySelectorAll(`#${currentTab} .user-card`);
+            
+            userCards.forEach(card => {
+                const username = card.querySelector('.user-info strong').textContent.toLowerCase();
+                card.style.display = username.includes(searchTerm) ? 'flex' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>

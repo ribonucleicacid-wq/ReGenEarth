@@ -237,35 +237,50 @@ $_SESSION['just_logged_in'] = false;
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function () {
-            loadUsers();  // Load all users initially
+            loadUsers();
 
-            // Function to load users
             function loadUsers(searchTerm = '') {
-                const action = searchTerm ? "searchUser" : "list"; // If search term is provided, call 'searchUser'
-                $.post("user_actions.php", { action: action, searchTerm: searchTerm }, function (data) {
-                    const users = JSON.parse(data);
+                const action = searchTerm.trim() !== '' ? "searchUser" : "list";
+                const userRole = $("#userRoleFilter").val() || "user";
+
+                $.post("user_actions.php", { action: action, searchTerm: searchTerm, userRole: userRole }, function (data) {
+                    let users;
+                    try {
+                        users = JSON.parse(data);
+                    } catch (error) {
+                        console.error("Failed to parse JSON:", error);
+                        return;
+                    }
+
                     const tbody = $("#userTable tbody").empty();
-                    users.forEach(user => {
-                        tbody.append(`
-                            <tr>
-                                <td>${user.user_id}</td>
-                                <td>${user.username}</td>
-                                <td>${user.email}</td>
-                                <td>${user.bio}</td>
-                                <td>${user.created_at}</td>
-                                <td>${user.updated_at}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning editUser" data-id="${user.user_id}">Edit</button>
-                                    <button class="btn btn-sm btn-danger deleteUser" data-id="${user.user_id}">Delete</button>
-                                </td>
-                            </tr>
-                        `);
-                    });
+                    if (users.length === 0) {
+                        tbody.append(`<tr><td colspan="7" class="text-center">No users found.</td></tr>`);
+                    } else {
+                        users.forEach(user => {
+                            tbody.append(`
+                        <tr>
+                            <td>${user.user_id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.bio}</td>
+                            <td>${user.created_at}</td>
+                            <td>${user.updated_at}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning editUser" data-id="${user.user_id}">Edit</button>
+                                <button class="btn btn-sm btn-danger deleteUser" data-id="${user.user_id}">Delete</button>
+                            </td>
+                        </tr>
+                    `);
+                        });
+                    }
                 });
             }
+
+            // Search input live typing
             $("#searchInput").on("input", function () {
-                const searchTerm = $(this).val();
-                loadUsers(searchTerm); // Reload with the search term
+                const searchTerm = $(this).val().toLowerCase();
+                loadUsers(searchTerm);
+
             });
 
             // Handle form submission

@@ -497,31 +497,37 @@ $role = $_SESSION['role'] ?? null;
             color: #4CAF50; 
             background-color: rgba(76, 175, 80, 0.1);
             box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
         }
         .notification-icon.comment { 
             color: #2196F3; 
             background-color: rgba(33, 150, 243, 0.1);
             box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
+            border: 2px solid #2196F3;
         }
         .notification-icon.follow { 
             color: #9C27B0; 
             background-color: rgba(156, 39, 176, 0.1);
             box-shadow: 0 0 10px rgba(156, 39, 176, 0.2);
+            border: 2px solid #9C27B0;
         }
         .notification-icon.badge { 
             color: #FFC107; 
             background-color: rgba(255, 193, 7, 0.1);
             box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
+            border: 2px solid #FFC107;
         }
         .notification-icon.mention { 
             color: #E91E63; 
             background-color: rgba(233, 30, 99, 0.1);
             box-shadow: 0 0 10px rgba(233, 30, 99, 0.2);
+            border: 2px solid #E91E63;
         }
         .notification-icon.action { 
             color: #00BCD4; 
             background-color: rgba(0, 188, 212, 0.1);
             box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
+            border: 2px solid #00BCD4;
         }
 
         /* Add glow effect on hover */
@@ -782,24 +788,50 @@ $role = $_SESSION['role'] ?? null;
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Function to update notification badge count
+            // Enhanced notification badge update system
             function updateNotificationBadge() {
-                const unreadCount = localStorage.getItem('unreadNotifications') || 0;
-                const badge = document.querySelector('.notification-badge');
-                if (badge) {
+                // Get accurate count from localStorage
+                const unreadCount = parseInt(localStorage.getItem('unreadNotifications') || '0');
+                
+                // Update all notification badges in the header
+                const badges = document.querySelectorAll('.notification-badge');
+                badges.forEach(badge => {
                     badge.textContent = unreadCount;
-                    badge.style.display = unreadCount > 0 ? 'block' : 'none';
-                }
+                    badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+                });
+                
+                console.log('Header notification badge updated:', unreadCount);
             }
 
-            // Initial count update
+            // Initialize badges immediately
             updateNotificationBadge();
-
-            // Listen for storage events to sync badge count
+            
+            // Multiple sync methods for maximum reliability:
+            
+            // 1. Listen for storage events (works across tabs/pages)
             window.addEventListener('storage', function(e) {
                 if (e.key === 'unreadNotifications') {
+                    console.log('Notification storage updated:', e.newValue);
                     updateNotificationBadge();
                 }
+            });
+            
+            // 2. Listen for custom events from notifications.php
+            document.addEventListener('unreadNotificationsUpdated', function(e) {
+                console.log('Notification update event received:', e.detail?.count);
+                updateNotificationBadge();
+            });
+            
+            // 3. Periodic check as a fallback (every 3 seconds)
+            setInterval(updateNotificationBadge, 3000);
+            
+            // 4. Update when notification icon is clicked
+            const notificationLinks = document.querySelectorAll('.notifications-nav .nav-link');
+            notificationLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // Small delay to ensure localStorage is updated first if needed
+                    setTimeout(updateNotificationBadge, 100);
+                });
             });
         });
     </script>

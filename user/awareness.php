@@ -6,12 +6,147 @@ include 'inc/header.php';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"="width=device-width, initial-scale=1.0">
     <title>Triple Planetary Crisis Awareness | ReGenEarth</title>
     <!-- Add Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Add Garet font -->
     <style>
+        /* Color Variables */
+        :root {
+            /* Dark Mode (Default) */
+            --rich-black: #0B1A26;
+            --prussian-blue: #132F43;
+            --moonstone: #57AFC3;
+            --text-primary: #FFFFFF;
+            --accent-color: #00a2ff;
+
+            /* Light Mode */
+            --silver: #CACFD3;
+            --taupe-gray: #999A9C;
+            --light-text-primary: #0B1A26;
+            --light-text-secondary: #132F43;
+            --light-accent-color: #57AFC3;
+        }
+
+        /* Light Mode Toggle */
+        body.light-mode {
+            background: linear-gradient(135deg, #f0f4f7 0%, #e9eef3 100%);
+            color: var(--rich-black);
+        }
+
+        body.light-mode .awareness-container {
+            background: linear-gradient(
+                45deg, 
+                rgba(87, 175, 195, 0.2), 
+                rgba(202, 207, 211, 0.5)
+            );
+            background-size: cover;
+            background-position: center;
+            backdrop-filter: blur(8px);
+        }
+
+        body.light-mode .main-content {
+            background: transparent;
+            backdrop-filter: none;
+            box-shadow: none;
+            border: none;
+        }
+
+        body.light-mode .image-grid {
+            background: transparent;
+        }
+
+        body.light-mode .image-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(87, 175, 195, 0.1);
+        }
+
+        /* Removed hover transformation for main content */
+
+        body.light-mode .static-title {
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00a2ff;
+            text-align: center;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            position: absolute;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added shadow for better visibility */
+        }
+
+        body.light-mode .image-card {
+            background-color: rgba(153, 154, 156, 0.3);
+            color: var(--rich-black);
+            border: 1px solid rgba(19, 47, 67, 0.1);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        body.light-mode .image-card:hover {
+            background-color: rgba(153, 154, 156, 0.5);
+            transform: scale(1.02);
+        }
+
+        body.light-mode .daily-tip-card {
+            background-color: rgba(153, 154, 156, 0.3);
+            color: var(--rich-black);
+            border: 1px solid rgba(19, 47, 67, 0.1);
+            transition: none;
+        }
+
+        body.light-mode .environmental-data-card {
+            background: linear-gradient(135deg, rgba(202, 207, 211, 0.8) 0%, rgba(153, 154, 156, 0.8) 100%);
+            color: var(--prussian-blue);
+            border: 1px solid var(--moonstone);
+            box-shadow: 0 4px 6px rgba(19, 47, 67, 0.1);
+        }
+
+        body.light-mode .environmental-data-card h3 {
+            color: var(--moonstone);
+        }
+
+        body.light-mode .footer {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(90deg, #0f2d54 0%, #0c4d50 100%);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        body.light-mode footer a {
+            color: inherit;
+            transition: none;
+        }
+
+        body.light-mode footer a:hover {
+            color: inherit;
+        }
+        @media (max-width: 768px) {
+            body.light-mode .main-content {
+                width: 95%;
+                background-color: rgba(255, 255, 255, 0.7);
+            }
+
+            body.light-mode .image-card {
+                background-color: rgba(153, 154, 156, 0.4);
+            }
+        }
+
         /* Awareness page styles are now scoped under .awareness-container */
         .awareness-container {
             max-width: 100%;
@@ -32,7 +167,7 @@ include 'inc/header.php';
             align-items: center;
             gap: 2rem;
             flex: 1;
-            width: 100%;
+            width: 90%;
             margin: 0 auto;
             padding: 0;
         }
@@ -53,7 +188,7 @@ include 'inc/header.php';
             opacity: 0;
         }
         .awareness-container .main-title {
-            font-family: 'Garet', sans-serif;
+            font-family: '', sans-serif;
             color: #00a2ff;
             margin-bottom: 2rem;
             line-height: 1;
@@ -67,7 +202,7 @@ include 'inc/header.php';
             display: block;
         }
         .awareness-container .main-title .large-text {
-            font-size: 48.8px;
+            font-size: 40px;
             display: block;
         }
         .awareness-container .main-description {
@@ -204,19 +339,33 @@ include 'inc/header.php';
             pointer-events: none;
             transition: opacity 0.3s;
         }
+        .tip-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-image: url('../assets/icons/tip-icon.svg');
+            background-size: contain;
+            background-repeat: no-repeat;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .daily-tip-card h3 .tip-icon {
+            margin-right: 8px;
+        }
         .awareness-container .info-overlay .main-title {
             color: #3ec6ff;
             font-family: 'Montserrat', sans-serif;
-            font-size: 2.0rem;
-            font-weight: 700;
+            font-size: 1.8rem;
+            font-weight: 600;
             margin-bottom: 1.5rem;
-            line-height: 1.1;
+            line-height: 1.0;
             text-transform: none;
         }
         .awareness-container .info-overlay p {
             font-family: 'Montserrat', sans-serif;
             font-size: 1.1rem;
-            line-height: 1.4;
+            line-height: 1.3;
             margin-bottom: 1rem;
             color: white;
             max-width: 90%;
@@ -379,7 +528,7 @@ include 'inc/header.php';
                 border-radius: 16px;
             }
             .content-cards {
-                width: 70%;
+                width: 80%;
             }
         }
 
@@ -640,6 +789,129 @@ include 'inc/header.php';
         .how-to-help-btn:hover {
             background-color: rgba(0, 162, 255, 0.2);
         }
+
+        /* Daily Tip Card Styles */
+        .daily-tip-card {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1000;
+            width: 320px;
+            max-width: 90%;
+            padding: 1.2rem 1.5rem;
+            background: linear-gradient(135deg, #0f2d54 0%, #0c4d50 100%);
+            color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
+            visibility: hidden;
+            cursor: pointer;
+        }
+
+        .daily-tip-card.active {
+            opacity: 1;
+            transform: translateY(0);
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .daily-tip-card h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #00a2ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .daily-tip-card h3 .tip-icon {
+            width: 24px;
+            height: 24px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2300a2ff"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .daily-tip-card p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin: 0;
+            color: #fff;
+            opacity: 0.9;
+        }
+
+        .daily-tip-card p strong {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 5px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        @media (max-width: 600px) {
+            .daily-tip-card {
+                width: calc(100% - 40px);
+                bottom: 10px;
+                right: 10px;
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        .environmental-data-card {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            z-index: 10;
+            width: 250px;
+            max-width: 80%;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(15, 45, 84, 0.9) 0%, rgba(12, 77, 80, 0.9) 100%);
+            color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .environmental-data-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #00a2ff;
+            text-align: center;
+        }
+
+        .environmental-data-card p {
+            font-size: 0.9rem;
+            line-height: 1.0;
+            text-align: center;
+            opacity: 0.9;
+        }
+
+        .environmental-data-card p strong {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 0 5px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        @media (max-width: 600px) {
+            .environmental-data-card {
+                width: calc(100% - 40px);
+                bottom: 20px;
+                right: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -759,6 +1031,10 @@ include 'inc/header.php';
                     </ul>
                 </div>
             </div>
+            <div id="daily-tip" class="daily-tip-card" role="alert" aria-live="polite">
+                <h3>Daily Sustainability Tip</h3>
+                <p>Loading daily tip...</p>
+            </div>
         </div>
         <!-- Modals, footer, and scripts remain unchanged, but should also be scoped if styled -->
         <div class="footer">
@@ -857,6 +1133,31 @@ include 'inc/header.php';
     </div>
 
     <script>
+        // Light Mode Toggle Functionality
+        function toggleLightMode() {
+            document.body.classList.toggle('light-mode');
+            
+            // Save user preference
+            const isLightMode = document.body.classList.contains('light-mode');
+            localStorage.setItem('lightMode', isLightMode);
+        }
+
+        // Check for saved light mode preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLightMode = localStorage.getItem('lightMode');
+            
+            // Apply saved preference if exists
+            if (savedLightMode === 'true') {
+                document.body.classList.add('light-mode');
+            }
+
+            // Add event listener to theme toggle button
+            const themeToggleBtn = document.querySelector('.theme-toggle-btn');
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', toggleLightMode);
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const imageCards = document.querySelectorAll('.image-card');
             const contentCards = document.querySelectorAll('.content-card');
@@ -927,12 +1228,120 @@ include 'inc/header.php';
             }
 
             // Handle both image clicks, hovers, and button clicks
+            // Environmental Data Configuration
+            const environmentalData = {
+                'climate': {
+                    name: 'Climate Change Impact',
+                    getData: () => {
+                        const tempAnomaly = 1.1 + Math.random() * 0.2;
+                        const severity = tempAnomaly > 1.5 ? 'Critical' : 'Significant';
+                        return `Global Temp Rise: <strong>${tempAnomaly.toFixed(2)}°C</strong><br>Impact: ${severity}`;
+                    }
+                },
+                'pollution': {
+                    name: 'Pollution Awareness',
+                    getData: () => {
+                        const pollutionLevel = 35 + Math.random() * 20;
+                        const category = getPollutionCategory(pollutionLevel);
+                        return `Air Quality Index: <strong>${pollutionLevel.toFixed(2)} µg/m³</strong><br>Status: ${category}`;
+                    }
+                },
+                'biodiversity': {
+                    name: 'Biodiversity Alert',
+                    getData: () => {
+                        const threatenedSpecies = 40000 + Math.floor(Math.random() * 1000);
+                        const riskLevel = threatenedSpecies > 41000 ? 'High Risk' : 'Moderate Risk';
+                        return `Threatened Species: <strong>${threatenedSpecies}</strong><br>Conservation Status: ${riskLevel}`;
+                    }
+                },
+                'tpc': {
+                    name: 'Carbon Emissions Insight',
+                    getData: () => {
+                        const co2Levels = 420 + Math.random() * 10;
+                        const trend = co2Levels > 425 ? 'Rapidly Increasing' : 'Gradually Rising';
+                        return `Global CO2 Levels: <strong>${co2Levels.toFixed(2)} ppm</strong><br>Trend: ${trend}`;
+                    }
+                }
+            };
+
+            // Pollution level categorization
+            function getPollutionCategory(value) {
+                if (value <= 12) return 'Good 🟢';
+                if (value <= 35.4) return 'Moderate 🟡';
+                if (value <= 55.4) return 'Unhealthy for Sensitive Groups 🟠';
+                if (value <= 150.4) return 'Unhealthy 🔴';
+                if (value <= 250.4) return 'Very Unhealthy 🟣';
+                return 'Hazardous 🚨';
+            }
+
+            // Function to create and display environmental data card
+            function createEnvironmentalDataCard(category) {
+                const imageCard = document.querySelector(`.image-card[data-category="${category}"]`);
+                if (!imageCard) return;
+
+                // Remove existing environmental data card
+                const existingCard = imageCard.querySelector('.environmental-data-card');
+                if (existingCard) {
+                    existingCard.remove();
+                }
+
+                // Only create card for categories with environmental data
+                if (!environmentalData[category]) return;
+
+                const envCard = document.createElement('div');
+                envCard.className = 'environmental-data-card';
+                envCard.innerHTML = `
+                    <h3>${environmentalData[category].name}</h3>
+                    <p>${environmentalData[category].getData()}</p>
+                `;
+
+                // Style the card to appear within the image grid
+                envCard.style.cssText = `
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                    z-index: 10;
+                    width: 250px;
+                    max-width: 80%;
+                    padding: 1rem;
+                    background: linear-gradient(135deg, rgba(15, 45, 84, 0.9) 0%, rgba(12, 77, 80, 0.9) 100%);
+                    color: #fff;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+                    opacity: 1;
+                    transform: translateY(0);
+                    transition: all 0.5s ease;
+                    cursor: pointer;
+                `;
+
+                // Add click to dismiss
+                envCard.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    envCard.style.opacity = '0';
+                    envCard.style.transform = 'translateY(20px)';
+                    setTimeout(() => envCard.remove(), 500);
+                });
+
+                // Append to the specific image card
+                imageCard.style.position = 'relative';
+                imageCard.appendChild(envCard);
+
+                // Auto-dismiss after 10 seconds
+                setTimeout(() => {
+                    if (imageCard.contains(envCard)) {
+                        envCard.style.opacity = '0';
+                        envCard.style.transform = 'translateY(20px)';
+                        setTimeout(() => envCard.remove(), 500);
+                    }
+                }, 10000);
+            }
+
             imageCards.forEach(card => {
                 const learnMoreBtn = card.querySelector('.learn-more-btn');
                 const howToHelpBtn = card.querySelector('.how-to-help-btn');
                 const category = card.getAttribute('data-category');
 
-                // Image click handler for background change
+                // Image click handler for background change and environmental data
                 card.addEventListener('click', (e) => {
                     if (e.target.closest('.button-container')) {
                         return; // Don't process if clicking buttons
@@ -941,14 +1350,26 @@ include 'inc/header.php';
                     if (bgMap[category]) {
                         setBackground(bgMap[category]);
                     }
+
+                    // Create environmental data card for the specific category
+                    createEnvironmentalDataCard(category);
                 });
 
-                // Mouse enter handler to close other cards
+                // Mouse enter handler to show environmental data card
                 card.addEventListener('mouseenter', () => {
                     hideAllCards();
                     if (bgMap[category]) {
                         setBackground(bgMap[category]);
                     }
+
+                    // Remove any existing environmental data cards
+                    const existingEnvCard = document.querySelector('.environmental-data-card');
+                    if (existingEnvCard) {
+                        existingEnvCard.remove();
+                    }
+
+                    // Create and show environmental data card
+                    createEnvironmentalDataCard(category);
                 });
 
                 // Learn More button click handler
@@ -959,6 +1380,14 @@ include 'inc/header.php';
                         
                         if (bgMap[category]) {
                             setBackground(bgMap[category]);
+                        }
+                        
+                        // Close environmental data card
+                        const envCard = card.querySelector('.environmental-data-card');
+                        if (envCard) {
+                            envCard.style.opacity = '0';
+                            envCard.style.transform = 'translateY(20px)';
+                            setTimeout(() => envCard.remove(), 500);
                         }
                         
                         if (targetCard.style.display === 'none' || !targetCard.style.display) {
@@ -977,6 +1406,14 @@ include 'inc/header.php';
                     howToHelpBtn.addEventListener('click', (e) => {
                         e.stopPropagation(); // Prevent image card click
                         
+                        // Close environmental data card
+                        const envCard = card.querySelector('.environmental-data-card');
+                        if (envCard) {
+                            envCard.style.opacity = '0';
+                            envCard.style.transform = 'translateY(20px)';
+                            setTimeout(() => envCard.remove(), 500);
+                        }
+                        
                         hideAllCards();
                         tpcCard.innerHTML = howToHelpContent;
                         tpcCard.style.display = 'block';
@@ -992,6 +1429,73 @@ include 'inc/header.php';
             // Initial setup
             attachCloseButtonListeners();
             setBackground(bgMap['tpc']);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const tipCard = document.getElementById('daily-tip');
+            const tipText = tipCard.querySelector('p');
+            const tipTitle = tipCard.querySelector('h3');
+
+            // Add tip icon to the title
+            const tipIcon = document.createElement('span');
+            tipIcon.classList.add('tip-icon');
+            tipTitle.insertBefore(tipIcon, tipTitle.firstChild);
+
+            // Function to fetch and display a tip
+            function fetchAndDisplayTip() {
+                fetch('fetch_tips.php?action=general')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Randomly select a tip from general tips
+                        const tips = data.tips;
+                        const randomTip = tips[Math.floor(Math.random() * tips.length)];
+                        
+                        if (randomTip) {
+                            // Fade out current tip
+                            tipCard.classList.remove('active');
+
+                            // Wait for fade out before changing text
+                            setTimeout(() => {
+                                // Animate text reveal
+                                let chars = randomTip.split('');
+                                tipText.textContent = '';
+                                chars.forEach((char, index) => {
+                                    setTimeout(() => {
+                                        tipText.textContent += char;
+                                    }, 20 * index);
+                                });
+
+                                // Update title, preserving the tip icon
+                                const tipIcon = tipTitle.querySelector('.tip-icon');
+                                tipTitle.innerHTML = '';
+                                tipTitle.appendChild(tipIcon);
+                                tipTitle.appendChild(document.createTextNode('Daily Sustainability Tip'));
+
+                                // Fade in new tip
+                                setTimeout(() => {
+                                    tipCard.classList.add('active');
+                                }, 300);
+                            }, 300);
+                        } else {
+                            tipText.textContent = 'No tips available at the moment.';
+                            tipCard.classList.add('active');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching the daily tip:', error);
+                        tipText.textContent = 'Unable to load the daily tip. Please try again later.';
+                        tipCard.classList.add('active');
+                    });
+            }
+
+            // Initial tip load
+            fetchAndDisplayTip();
+
+            // Cycle through tips every 10 seconds
+            setInterval(fetchAndDisplayTip, 10000);
+
+            // Optional: Add click to manually cycle tips
+            tipCard.addEventListener('click', fetchAndDisplayTip);
         });
     </script>
 </body>

@@ -761,21 +761,48 @@ include 'inc/header.php';
   <div class="posts-section">
         <h3 class="posts-title">My Posts</h3>
     <div class="posts-tabs">
-      <a href="#" class="active">All Posts</a>
-      <a href="#">Climate Change</a>
-      <a href="#">Pollution</a>
-      <a href="#">Biodiversity Loss</a>
+      <a href="#" class="active" data-topic="all">All Posts</a>
+      <a href="#" data-topic="Climate Change">Climate Change</a>
+      <a href="#" data-topic="Pollution">Pollution</a>
+      <a href="#" data-topic="Biodiversity Loss">Biodiversity Loss</a>
     </div>
     <div class="post-grid">
-            <?php for($i = 0; $i < 6; $i++): ?>
-        <div class="post-card">
-                    <img src="https://picsum.photos/seed/post<?=$i?>/300/200" alt="Post">
-                    <div class="post-interactions">
-                        <div class="interaction-item">♥ 1</div>
-                        <div class="interaction-item">💬 3</div>
-          </div>
-        </div>
-      <?php endfor; ?>
+        <?php
+        // Get user's posts
+        $stmt = $conn->prepare("
+            SELECT p.*, 
+                   (SELECT COUNT(*) FROM likes WHERE post_id = p.post_id) as likes_count,
+                   (SELECT COUNT(*) FROM comments WHERE post_id = p.post_id) as comments_count,
+                   (SELECT media_url FROM post_media WHERE post_id = p.post_id AND media_type = 'image' LIMIT 1) as thumbnail
+            FROM posts p 
+            WHERE p.user_id = ? 
+            ORDER BY p.created_at DESC
+        ");
+        $stmt->execute([$_SESSION['user_id']]);
+        $user_posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($user_posts as $post):
+            $thumbnail = $post['thumbnail'] ?? 'default-post.jpg';
+        ?>
+            <div class="post-card" data-topic="<?= htmlspecialchars($post['topic']) ?>">
+                <img src="uploads/<?= htmlspecialchars($thumbnail) ?>" alt="Post thumbnail">
+                <div class="post-content">
+                    <h4><?= htmlspecialchars($post['title']) ?></h4>
+                    <p><?= substr(htmlspecialchars($post['content']), 0, 100) ?>...</p>
+                </div>
+                <div class="post-interactions">
+                    <div class="interaction-item">
+                        <i class="fas fa-heart"></i> <?= $post['likes_count'] ?>
+                    </div>
+                    <div class="interaction-item">
+                        <i class="fas fa-comment"></i> <?= $post['comments_count'] ?>
+                    </div>
+                    <div class="interaction-item">
+                        <i class="fas fa-clock"></i> <?= formatTimeAgo($post['created_at']) ?>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
   </div>
 </div>
@@ -976,6 +1003,47 @@ include 'inc/header.php';
             particlesContainer.appendChild(particle);
         }
     });
+
+    // Add post filtering functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.posts-tabs a');
+        const posts = document.querySelectorAll('.post-card');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+
+                const topic = this.dataset.topic;
+                
+                // Show/hide posts based on topic
+                posts.forEach(post => {
+                    if (topic === 'all' || post.dataset.topic === topic) {
+                        post.style.display = '';
+                    } else {
+                        post.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+
+    function formatTimeAgo(timestamp) {
+        const date = new Date(timestamp);
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000);
+
+        if (diff < 60) return 'Just now';
+        if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)}d ago`;
+
+        return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+    }
 </script>
 
 <?php include 'inc/footer.php'; ?>

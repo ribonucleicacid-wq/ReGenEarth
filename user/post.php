@@ -1,7 +1,94 @@
 <?php
 session_start();
+
+// Define upload directory path
+$upload_dir = __DIR__ . '/uploads/';
+if (!file_exists($upload_dir)) {
+    mkdir($upload_dir, 0777, true);
+}
+
 include 'inc/header.php';
 include '../auth/user_only.php';
+require_once '../src/db_connection.php';
+
+$db = new Database();
+$conn = $db->getConnection();
+
+$error_message = '';
+$success_message = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    try {
+        $conn->beginTransaction();
+
+        // Get post data
+        $user_id = $_SESSION['user_id'];
+        $title = $_POST['title'];
+        $content = $_POST['content'];
+        $topic = $_POST['topic'];
+
+        // Create post
+        $stmt = $conn->prepare("CALL sp_create_post(?, ?, ?, ?)");
+        $stmt->execute([$user_id, $title, $content, $topic]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $post_id = $result['post_id'];
+        $stmt->closeCursor();
+
+        // Handle image uploads
+        if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
+            foreach ($_FILES['images']['tmp_name'] as $key => $tmp_name) {
+                if ($_FILES['images']['error'][$key] === 0) {
+                    $file_name = $_FILES['images']['name'][$key];
+                    $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                    $new_file_name = uniqid() . '.' . $file_ext;
+                    $destination = $upload_dir . $new_file_name;
+                    
+                    if (move_uploaded_file($tmp_name, $destination)) {
+                        $stmt = $conn->prepare("CALL sp_add_post_media(?, 'image', ?)");
+                        $stmt->execute([$post_id, $new_file_name]);
+                        $stmt->closeCursor();
+                    } else {
+                        throw new Exception("Failed to upload image: " . $file_name);
+                    }
+                }
+            }
+        }
+
+        // Handle video uploads
+        if (isset($_FILES['videos']) && !empty($_FILES['videos']['name'][0])) {
+            foreach ($_FILES['videos']['tmp_name'] as $key => $tmp_name) {
+                if ($_FILES['videos']['error'][$key] === 0) {
+                    $file_name = $_FILES['videos']['name'][$key];
+                    $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                    $new_file_name = uniqid() . '_video.' . $file_ext;
+                    $destination = $upload_dir . $new_file_name;
+                    
+                    if (move_uploaded_file($tmp_name, $destination)) {
+                        $stmt = $conn->prepare("CALL sp_add_post_media(?, 'video', ?)");
+                        $stmt->execute([$post_id, $new_file_name]);
+                        $stmt->closeCursor();
+                    } else {
+                        throw new Exception("Failed to upload video: " . $file_name);
+                    }
+                }
+            }
+        }
+
+        $conn->commit();
+        $success_message = "Post created successfully!";
+        
+        // Use JavaScript to redirect after a short delay
+        echo "<script>
+            setTimeout(function() {
+                window.location.href = 'home.php';
+            }, 1500);
+        </script>";
+        
+    } catch (Exception $e) {
+        $conn->rollBack();
+        $error_message = "Error: " . $e->getMessage();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -225,14 +312,39 @@ include '../auth/user_only.php';
       margin-top: 5px;
       margin-left: 15px;
     }
+
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+    }
+    .alert-success {
+      color: #155724;
+      background-color: #d4edda;
+      border-color: #c3e6cb;
+    }
+    .alert-danger {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+    }
   </style>
 </head>
 
 <body>
 
   <div class="create-post-container">
+    <?php if ($error_message): ?>
+      <div class="alert alert-danger"><?php echo $error_message; ?></div>
+    <?php endif; ?>
+    
+    <?php if ($success_message): ?>
+      <div class="alert alert-success"><?php echo $success_message; ?></div>
+    <?php endif; ?>
+
     <h2>Create New Post</h2>
-    <form action="home.php" method="POST" enctype="multipart/form-data">
+    <form action="" method="POST" enctype="multipart/form-data">
       <label for="title">Title</label>
       <textarea id="title" name="title" placeholder="Add your title here..." required></textarea>
 

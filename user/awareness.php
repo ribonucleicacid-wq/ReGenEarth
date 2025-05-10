@@ -1,9 +1,12 @@
 <?php
+session_start();
 include 'inc/header.php';
+include '../auth/user_only.php';
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"="width=device-width, initial-scale=1.0">
@@ -158,6 +161,16 @@ include 'inc/header.php';
             background: linear-gradient(rgba(0, 28, 46, 0.70), rgba(0, 28, 46, 0.70));
             background-size: cover;
             background-position: center;
+        .tpc-content {
+            --moonstone: #57AFC3;
+            --prussian-blue: #132F43;
+            --silver: #CACFD3;
+            --taupe-gray: #999A9C;
+            --rich-black: #0B1A26;
+            --brunswick-green: #234F38;
+            font-family: 'Inter', 'Arial', sans-serif;
+            color: var(--silver);
+            line-height: 1.6;
             position: relative;
             overflow-y: auto;
         }
@@ -914,6 +927,7 @@ include 'inc/header.php';
         }
     </style>
 </head>
+
 <body>
     <div class="awareness-container">
         <div class="main-content" id="main-content">
@@ -925,6 +939,30 @@ include 'inc/header.php';
                         <h2 class="main-title">THE<br>TRIPLE<br>PLANETARY CRISIS</h2>
                         <p>The TPC refers to three <strong>interconnected environmental threats</strong> caused by human activity: <strong>Pollution, Climate Change, and Biodiversity Loss</strong>.</p>
                         <p>These problems might sound overwhelming, but knowledge is power! Keep reading to uncover the causes, impacts, and—most importantly—<strong>how YOU can make a difference</strong>.</p>
+    <div class="tpc-content">
+        <div class="container">
+            <section class="hero-section">
+                <h1>The Triple Planetary Crisis</h1>
+                <p class="hero-text">Our planet faces three interconnected challenges that threaten
+                    our environment,
+                    health, and future. Understanding these crises is the first step toward creating positive
+                    change.
+                </p>
+            </section>
+
+            <div class="crisis-grid">
+                <div class="crisis-card">
+                    <img src="../assets/images/pollution.jpg" alt="Environmental Pollution" class="card-image">
+                    <div class="card-content">
+                        <h3 class="card-title">Pollution Crisis</h3>
+                        <p class="card-text">Pollution affects air, water, and soil quality, posing serious
+                            risks to both human health and ecosystems.</p>
+                        <ul class="info-list">
+                            <li>Industrial emissions and waste</li>
+                            <li>Plastic pollution in oceans</li>
+                            <li>Air quality deterioration</li>
+                            <li>Chemical contamination</li>
+                        </ul>
                     </div>
                     <div class="button-container">
                         <button class="learn-more-btn">Learn More</button>
@@ -940,6 +978,19 @@ include 'inc/header.php';
                     </div>
                     <div class="button-container">
                         <button class="learn-more-btn">Learn More</button>
+                <div class="crisis-card">
+                    <img src="../assets/images/climate_change.jpg" alt="Climate Change" class="card-image">
+                    <div class="card-content">
+                        <h3 class="card-title">Climate Crisis</h3>
+                        <p class="card-text">Global climate change leads to rising temperatures,
+                            extreme weather events,
+                            and disrupted ecosystems.</p>
+                        <ul class="info-list">
+                            <li>Rising sea levels</li>
+                            <li>Extreme weather patterns</li>
+                            <li>Global temperature rise</li>
+                            <li>Melting ice caps</li>
+                        </ul>
                     </div>
                     <div class="image-label">Pollution</div>
                     <div class="subtitle">A toxic legacy</div>
@@ -964,6 +1015,19 @@ include 'inc/header.php';
                     </div>
                     <div class="button-container">
                         <button class="learn-more-btn">Learn More</button>
+
+                <div class="crisis-card">
+                    <img src="../assets/images/bioloss.jpg" alt="Biodiversity Loss" class="card-image">
+                    <div class="card-content">
+                        <h3 class="card-title">Biodiversity Crisis</h3>
+                        <p class="card-text">The rapid loss of species and habitats threatens the delicate
+                            balance of Earth's ecosystems.</p>
+                        <ul class="info-list">
+                            <li>Species extinction</li>
+                            <li>Habitat destruction</li>
+                            <li>Ecosystem collapse</li>
+                            <li>Food chain disruption</li>
+                        </ul>
                     </div>
                     <div class="image-label">Biodiversity Loss</div>
                     <div class="subtitle">A Silent Disaster</div>
@@ -979,6 +1043,15 @@ include 'inc/header.php';
                     <p>Pollution, climate change, and biodiversity loss are pushing Earth to its limits. Together, these crises form the <strong>Triple Planetary Crisis (TPC)</strong>—an urgent environmental challenge that affects everyone, from bustling cities to remote villages.</p>
                     <p>But here's the good news: <strong>we still have time to act!</strong></p>
                 </div>
+            <section class="tips-section">
+                <h2 class="section-title">Taking Action</h2>
+                <div class="tips-grid">
+                    <div class="tip-item">
+                        <div class="tip-icon">🌱</div>
+                        <h4 class="tip-title">Reduce Carbon Footprint</h4>
+                        <p class="tip-text">Choose sustainable transportation and energy-efficient appliances.
+                        </p>
+                    </div>
 
                 <div class="content-card" id="pollutionCard" style="display: none;">
                     <button class="close-card">×</button>
@@ -1029,6 +1102,12 @@ include 'inc/header.php';
                         <li>Disrupted agriculture and food supply.</li>
                         <li>Reduced Climate Resilience: Less biodiversity makes it harder for nature to adapt to climate change.</li>
                     </ul>
+                    <div class="tip-item">
+                        <div class="tip-icon">🌳</div>
+                        <h4 class="tip-title">Support Conservation</h4>
+                        <p class="tip-text">Participate in local conservation efforts and wildlife protection.
+                        </p>
+                    </div>
                 </div>
             </div>
             <div id="daily-tip" class="daily-tip-card" role="alert" aria-live="polite">

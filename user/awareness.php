@@ -868,7 +868,7 @@ include 'inc/header.php';
             bottom: 10px;
             right: 10px;
             z-index: 10;
-            width: 250px;
+            width: 240px;
             max-width: 80%;
             padding: 1rem;
             background: linear-gradient(135deg, rgba(15, 45, 84, 0.9) 0%, rgba(12, 77, 80, 0.9) 100%);
@@ -889,7 +889,7 @@ include 'inc/header.php';
         }
 
         .environmental-data-card p {
-            font-size: 0.9rem;
+            font-size: 1.0rem;
             line-height: 1.0;
             text-align: center;
             opacity: 0.9;
@@ -1223,6 +1223,15 @@ include 'inc/header.php';
                                 attachCloseButtonListeners();
                             }
                         }, 300);
+
+                        // Remove the environmental data card associated with the image card
+                        const imageCard = document.querySelector(`.image-card[data-category="${card.id.replace('Card', '')}"]`);
+                        if (imageCard) {
+                            const envCard = imageCard.querySelector('.environmental-data-card');
+                            if (envCard) {
+                                envCard.remove();
+                            }
+                        }
                     });
                 });
             }

@@ -1,19 +1,19 @@
 <!-- Header -->
 <header class="header">
     <nav class="nav">
-        <div class="nav_top">
+        <div class="nav_left">
             <a href="#" class="nav_logo">
-                <img src="uploads/logo.png" class="d-inline-block align-center logo-img" alt="" loading="lazy" />
+                <img src="uploads/logo.png" class="logo-img" alt="" loading="lazy" />
                 ReGenEarth
             </a>
+        </div>
+        <div class="nav_right">
+            <ul class="nav_items">
+                <li><a href="landing_page.php" class="nav_link">Home</a></li>
+                <li><a href="about_us.php" class="nav_link">About Us</a></li>
+            </ul>
             <button class="button" id="form-open">Login</button>
         </div>
-        <ul class="nav_items">
-            <li class="nav_item">
-                <a href="landing_page.php" class="nav_link">Home</a>
-                <a href="about_us.php" class="nav_link">About Us</a>
-            </li>
-        </ul>
     </nav>
 </header>
 
@@ -24,46 +24,45 @@
     }
 
     .nav {
-        width: 100%;
-        padding: 0.5rem 2rem;
-    }
-
-    .nav_top {
         display: flex;
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.5rem 2rem;
+    }
+
+    .nav_left {
+        display: flex;
+        align-items: center;
     }
 
     .logo-img {
         width: 50px;
         height: 50px;
         object-fit: contain;
-        margin-right: 20px;
+        margin-right: 10px;
     }
 
     .nav_logo {
-        align-items: center;
         display: flex;
+        align-items: center;
         color: white;
         text-decoration: none;
         font-size: 1.2rem;
     }
 
-    .nav_items {
-        list-style-type: none;
+    .nav_right {
         display: flex;
-        justify-content: center;
-        gap: 2rem;
-        margin: 0;
-        padding: 1rem 0;
-        width: 100%;
+        align-items: center;
+        gap: 1.5rem;
     }
 
-    .nav_item {
+    .nav_items {
+        display: flex;
         list-style: none;
+        gap: 1.5rem;
+        margin: 0;
+        padding: 0;
     }
 
     .nav_link {
@@ -89,5 +88,26 @@
 
     .button:hover {
         background: #0088d6;
+    }
+
+    font-size: 1rem;
+    color: #fff;
+    border: none;
+    border-radius: 2rem;
+    cursor: pointer;
+    }
+
+    .anim-button button:hover {
+        background-color: #2d6a4f;
+    }
+
+    .anim-wrapper-2 h5 {
+        font-size: 2.5rem;
+        color: #fff;
+    }
+
+    .anim-wrapper-2 p {
+        font-size: 1.2rem;
+        color: #fff;
     }
 </style>

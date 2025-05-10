@@ -1,7 +1,7 @@
 <?php
 session_start();
 include "inc/navigation.php";
-include '../../auth/admin_only.php';
+include '../../auth/staff_only.php';
 require_once '../../src/db_connection.php';
 
 $_SESSION['just_logged_in'] = false;

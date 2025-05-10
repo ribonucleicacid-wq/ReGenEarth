@@ -1,4 +1,7 @@
 # Custom exclusions
 settings.json
 tests.php
+try.php
+testing.php
 .vscode
+.gitignore

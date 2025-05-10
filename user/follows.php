@@ -1,5 +1,12 @@
-<?php include 'inc/header.php'; ?>
 <?php
+session_start();
+include 'inc/header.php';
+include '../auth/user_only.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /landing_page.php');
+    exit;
+}
 
 $followedUsers = [
     [
@@ -35,6 +42,7 @@ $followers = [
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Follows</title>
@@ -175,7 +183,7 @@ $followers = [
         }
 
         .success-message {
-            background-color:rgb(81, 105, 82);
+            background-color: rgb(81, 105, 82);
             color: white;
             padding: 10px;
             border-radius: 5px;
@@ -212,6 +220,7 @@ $followers = [
         }
     </style>
 </head>
+
 <body class="body">
     <div class="center-wrapper">
         <div class="follow-page active">
@@ -237,7 +246,8 @@ $followers = [
                             <div class="user-info">
                                 <strong><?php echo htmlspecialchars($user['username']); ?></strong>
                             </div>
-                            <button class="button unfollow" onclick="toggleFollow(this, <?php echo $user['id']; ?>, 'unfollow')">Unfollow</button>
+                            <button class="button unfollow"
+                                onclick="toggleFollow(this, <?php echo $user['id']; ?>, 'unfollow')">Unfollow</button>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -254,7 +264,8 @@ $followers = [
                                 <strong><?php echo htmlspecialchars($user['username']); ?></strong>
                             </div>
                             <?php if (!in_array($user['id'], array_column($followedUsers, 'id'))): ?>
-                                <button class="button follow" onclick="toggleFollow(this, <?php echo $user['id']; ?>, 'follow')">Follow</button>
+                                <button class="button follow"
+                                    onclick="toggleFollow(this, <?php echo $user['id']; ?>, 'follow')">Follow</button>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
@@ -266,7 +277,7 @@ $followers = [
     <script>
         // Store followed users in localStorage
         let followedUsers = <?php echo json_encode(array_column($followedUsers, 'id')); ?>;
-        
+
         // Function to show message
         function showMessage(message, type) {
             const messageContainer = document.getElementById('messageContainer');
@@ -298,25 +309,25 @@ $followers = [
             const userCard = button.closest('.user-card');
             const username = userCard.querySelector('.user-info strong').textContent;
             const profilePic = userCard.querySelector('img').src;
-            
+
             if (action === 'follow') {
                 // Add to followed 
                 followedUsers.push(userId);
-                
+
                 // Add to Following 
                 const followingList = document.getElementById('followingList');
                 followingList.insertAdjacentHTML('beforeend', createUserCard(userId, username, profilePic, true));
-                
+
                 // Update button 
                 button.textContent = 'Unfollow';
                 button.className = 'button unfollow';
-                button.onclick = function() { toggleFollow(this, userId, 'unfollow'); };
-                
+                button.onclick = function () { toggleFollow(this, userId, 'unfollow'); };
+
                 showMessage(`Successfully followed ${username}!`, 'success');
             } else {
                 // Remove from followed users
                 followedUsers = followedUsers.filter(id => id !== userId);
-                
+
                 // Remove from Following tab
                 const followingList = document.getElementById('followingList');
                 const cardToRemove = followingList.querySelector(`[data-user-id="${userId}"]`);
@@ -324,12 +335,12 @@ $followers = [
                     cardToRemove.classList.add('fade-out');
                     setTimeout(() => cardToRemove.remove(), 300);
                 }
-                
+
                 // Update button in current view
                 button.textContent = 'Follow';
                 button.className = 'button follow';
-                button.onclick = function() { toggleFollow(this, userId, 'follow'); };
-                
+                button.onclick = function () { toggleFollow(this, userId, 'follow'); };
+
                 showMessage(`Unfollowed ${username}`, 'success');
             }
         }
@@ -340,7 +351,7 @@ $followers = [
                 // Remove active class from all tabs and content
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
+
                 // Add active class to clicked tab and show corresponding content
                 tab.classList.add('active');
                 document.getElementById(tab.dataset.tab).classList.add('active');
@@ -352,7 +363,7 @@ $followers = [
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const currentTab = document.querySelector('.tab.active').dataset.tab;
             const userCards = document.querySelectorAll(`#${currentTab} .user-card`);
-            
+
             userCards.forEach(card => {
                 const username = card.querySelector('.user-info strong').textContent.toLowerCase();
                 card.style.display = username.includes(searchTerm) ? 'flex' : 'none';
@@ -360,4 +371,5 @@ $followers = [
         });
     </script>
 </body>
+
 </html>

@@ -207,16 +207,16 @@ include 'inc/header.php';
         .awareness-container .info-overlay .main-title {
             color: #3ec6ff;
             font-family: 'Montserrat', sans-serif;
-            font-size: 2.2rem;
+            font-size: 2.0rem;
             font-weight: 700;
             margin-bottom: 1.5rem;
-            line-height: 1.2;
+            line-height: 1.1;
             text-transform: none;
         }
         .awareness-container .info-overlay p {
             font-family: 'Montserrat', sans-serif;
-            font-size: 1.2rem;
-            line-height: 1.6;
+            font-size: 1.1rem;
+            line-height: 1.4;
             margin-bottom: 1rem;
             color: white;
             max-width: 90%;
@@ -664,7 +664,7 @@ include 'inc/header.php';
                     <img src="../assets/images/pollution1.jpg" alt="Pollution">
                     <div class="info-overlay">
                         <h2 class="main-title">Pollution</h2>
-                        <p>Pollution exists in many forms—air, water, soil, and plastic waste. Factories, vehicles, and improper waste disposal introduce harmful chemicals into our surroundings. Burning fossil fuels (coal, oil, gas) releases pollutants that poison the air we breathe and disrupt ecosystems.</p>
+                        <p><strong>Pollution exists in many forms</strong>—air, water, soil, and plastic waste. Factories, vehicles, and improper waste disposal introduce harmful chemicals into our surroundings. Burning fossil fuels (coal, oil, gas) releases pollutants that <strong>poison the air we breathe and disrupt ecosystems.</strong></p>
                     </div>
                     <div class="button-container">
                         <button class="learn-more-btn">Learn More</button>
@@ -860,7 +860,6 @@ include 'inc/header.php';
         document.addEventListener('DOMContentLoaded', function() {
             const imageCards = document.querySelectorAll('.image-card');
             const contentCards = document.querySelectorAll('.content-card');
-            const closeButtons = document.querySelectorAll('.close-card');
             const body = document.querySelector('body');
             const tpcCard = document.getElementById('tpcCard');
 
@@ -906,11 +905,11 @@ include 'inc/header.php';
                 });
                 // Reset TPC content to original when hiding cards
                 tpcCard.innerHTML = originalTpcContent;
-                // Reattach close button event listener
-                attachCloseButtonListeners();
+                attachCloseButtonListeners(); // Reattach close button listeners
             }
 
             function attachCloseButtonListeners() {
+                const closeButtons = document.querySelectorAll('.close-card');
                 closeButtons.forEach(button => {
                     button.addEventListener('click', () => {
                         const card = button.closest('.content-card');
@@ -984,7 +983,7 @@ include 'inc/header.php';
                         setTimeout(() => {
                             tpcCard.classList.add('active');
                             tpcCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            attachCloseButtonListeners();
+                            attachCloseButtonListeners(); // Reattach close button listeners
                         }, 10);
                     });
                 }

@@ -1,5 +1,4 @@
 <?php
-// filepath: c:\xampp\htdocs\ReGenEarth\user\fetch_environmental_data.php
 
 header('Content-Type: application/json');
 $apiKey = 'bd5f50fa8246ba25c5caf48136dc8897';
@@ -39,25 +38,6 @@ try {
         $response = file_get_contents($url);
         echo $response;
 
-    } elseif ($category === 'carbon') {
-        // Fetch carbon emissions data
-        $url = "https://api.v2.emissions-api.org/api/v2/carbonmonoxide/average.json?country=PH";
-
-        $response = file_get_contents($url);
-        if ($response === false) {
-            echo json_encode(['error' => 'Unable to fetch carbon emissions data']);
-            exit;
-        }
-
-        $data = json_decode($response, true);
-
-        // Extract relevant carbon emissions data
-        $carbonData = [
-            'co2_level' => $data['average'] ?? 'N/A',
-            'unit' => 'ppm',
-        ];
-
-        echo json_encode($carbonData);
 
     } elseif ($category === 'biodiversity') {
         // Fetch biodiversity data

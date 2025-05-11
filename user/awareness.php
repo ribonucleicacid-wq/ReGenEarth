@@ -1266,14 +1266,6 @@ include '../auth/user_only.php';
                         return `Threatened Species: <strong>${threatenedSpecies}</strong><br>Conservation Status: ${riskLevel}`;
                     }
                 },
-                'tpc': {
-                    name: 'Carbon Emissions Insight',
-                    getData: () => {
-                        const co2Levels = 420 + Math.random() * 10;
-                        const trend = co2Levels > 425 ? 'Rapidly Increasing' : 'Gradually Rising';
-                        return `Global CO2 Levels: <strong>${co2Levels.toFixed(2)} ppm</strong><br>Trend: ${trend}`;
-                    }
-                }
             };
 
             // Pollution level categorization
@@ -1305,7 +1297,7 @@ include '../auth/user_only.php';
                 envCard.className = 'environmental-data-card';
                 envCard.innerHTML = `
                     <h3>${category === 'pollution' ? 'Pollution Awareness' : 
-                        category === 'climate' ? 'Climate Change Impact' : 
+                        category === 'climate' ? 'Climate Change' : 
                         category === 'carbon' ? 'Carbon Emissions Insight' : 
                         'Biodiversity Alert'}</h3>
                     <p>${data}</p>
@@ -1543,7 +1535,7 @@ include '../auth/user_only.php';
                     const unit = data.unit || 'ppm';
 
                     return `
-                        CO2 Level: <strong>${co2Level} ${unit}</strong>
+                        CO2 Level: <strong>${co2Level} ${unit}</strong><br>
                     `;
                 } else if (category === 'biodiversity') {
                     const threatenedSpecies = data.threatened_species || 'N/A'; // Threatened species count
@@ -1624,16 +1616,6 @@ include '../auth/user_only.php';
                 }
             }, 10000);
         }
-
-        // Attach event listeners to the "Learn More" buttons
-        document.querySelectorAll('.image-card').forEach((card) => {
-            const button = card.querySelector('.learn-more-btn');
-            const category = card.getAttribute('data-category');
-
-            button.addEventListener('click', () => {
-                createEnvironmentalDataCard(category);
-            });
-        });
     </script>
 </body>
 </html>

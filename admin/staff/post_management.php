@@ -1,7 +1,8 @@
 <?php
 session_start();
 include "inc/navigation.php";
-include '../../auth/staff_only.php';
+include '../auth/admin_only.php';
+require_once '../src/db_connection.php';
 
 $_SESSION['just_logged_in'] = false;
 ?>
@@ -11,44 +12,31 @@ $_SESSION['just_logged_in'] = false;
 
 <head>
     <meta charset="UTF-8">
-    <title>Post Management - ReGenEarth</title>
+    <title>Posts Management - ReGenEarth</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet" />
-    <link rel="shortcut icon" href="uploads/logo.png" type="image/png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
+    <link rel="shortcut icon" href="../uploads/logo.png" type="image/png" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" />
 
     <style>
         :root {
             --moonstone: #57AFC3;
-            /* Table header background */
             --prussian-blue: #132F43;
-            /* Page background */
             --silver: #E2E6EA;
-            /* Light text color */
             --taupe-gray: #999A9C;
             --rich-black: #0B1A26;
-            /* Table body background */
-        }
-
-        .light-mode {
-            --moonstone: #489fb5;
-            --prussian-blue: #f8f9fa;
-            /* Light background */
-            --silver: #212529;
-            /* Dark text */
-            --taupe-gray: #6c757d;
-            --rich-black: #ffffff;
-            /* Table background */
         }
 
         * {
             font-family: "Poppins", sans-serif;
         }
 
-        body {}
-
         .main {
             padding: 2rem;
+            background-color: var(--prussian-blue);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         h2 {
@@ -59,37 +47,11 @@ $_SESSION['just_logged_in'] = false;
         .table {
             background-color: var(--rich-black);
             color: var(--silver);
-            border-color: var(--moonstone);
         }
 
         .table thead th {
-            background-color: var(--moonstone);
-            color: white;
-            border-color: var(--moonstone);
-        }
-
-        .table td,
-        .table th {
-            vertical-align: middle !important;
-            border-color: var(--moonstone);
-        }
-
-        .btn-custom {
-            border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            border: none;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .btn-edit {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .btn-edit:hover {
-            background-color: #e0a800;
-            color: #fff;
+            background-color: var(--rich-black);
+            color: var(--silver);
         }
 
         .btn-delete {
@@ -101,96 +63,144 @@ $_SESSION['just_logged_in'] = false;
             background-color: #bd2130;
         }
 
-        .btn-add {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .btn-add:hover {
-            background-color: #218838;
-        }
-
-        .table-responsive {
-            margin-top: 20px;
-        }
-
-        .main {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: var(--prussian-blue);
-        }
-
-        td {
-            font-size: 12px;
-            color: var(--moonstone)
+        .modal-content {
+            background-color: var(--rich-black);
+            color: var(--silver);
         }
     </style>
 </head>
 
-<body class="dashboard">
+<body>
     <div class="main">
-        <h2 class="mb-4 mt-5">Posts Management</h2>
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
+        <h2 class="mb-4 text-center">Post Management</h2>
+
+        <div class="table-responsive w-100">
+            <table class="table table-bordered table-hover" id="tipTable">
                 <thead>
                     <tr>
-                        <th>ID</th>
+                        <th>Post ID</th>
+                        <th>User ID</th>
                         <th>Title</th>
-                        <th>Author</th>
-                        <th>Date</th>
-                        <th style="width: 160px;">Actions</th>
+                        <th>Content</th>
+                        <th>Topic</th>
+                        <th>Created At</th>
+                        <th>Updated At</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>101</td>
-                        <td>How to Recycle</td>
-                        <td>JohnDoe</td>
-                        <td>2024-08-15</td>
-                        <td>
-                            <button class="btn btn-edit btn-custom" onclick="editPost(this)">
-                                <i class="fas fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-delete btn-custom" onclick="deletePost(this)">
-                                <i class="fas fa-trash"></i> Delete
-                            </button>
-                        </td>
-                    </tr>
+                    <!-- Dynamic content -->
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">
-            <button class="btn btn-add btn-custom" onclick="addPost()">
-                <i class="fas fa-plus"></i> Add Post
-            </button>
+    </div>
+
+    <!-- Delete Reason Modal -->
+    <div class="modal fade" id="deleteReasonModal" tabindex="-1" role="dialog" aria-labelledby="deleteReasonModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <form id="deleteForm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Post</h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true" class="text-white">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Why are you deleting this post?</p>
+                        <select id="deleteReason" class="form-control" required>
+                            <option value="" disabled selected>Select a reason</option>
+                            <option value="Harmful words">Harmful words</option>
+                            <option value="Inappropriate text">Inappropriate text</option>
+                            <option value="Spam or misleading">Spam or misleading</option>
+                            <option value="Off-topic">Off-topic</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <input type="hidden" id="deletePostId">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
     <script>
-        function deleteUser(button) {
-            const row = button.closest("tr");
-            const username = row.children[1].textContent;
-            if (confirm(`Are you sure you want to delete user "${username}"?`)) {
-                row.remove();
-                // TODO: Connect to backend to delete
+        document.addEventListener("DOMContentLoaded", function () {
+            const tipTableBody = document.querySelector("#tipTable tbody");
+
+            function postToTips(data) {
+                return fetch("post_actions.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                }).then(res => res.json());
             }
-        }
 
-        function editUser(button) {
-            const row = button.closest("tr");
-            const username = row.children[1].textContent;
-            alert(`Edit user "${username}" - feature not implemented yet.`);
-            // TODO: Add modal or redirect for editing
-        }
+            function loadTips() {
+                postToTips({ action: "list" })
+                    .then(data => {
+                        tipTableBody.innerHTML = "";
 
-        function addUser() {
-            alert("Add user feature not implemented yet.");
-            // TODO: Show form or redirect to user_create.php
-        }
+                        if (!data.length) {
+                            tipTableBody.innerHTML = `<tr><td colspan="8" class="text-center">No posts found.</td></tr>`;
+                            return;
+                        }
+
+                        data.forEach(post => {
+                            tipTableBody.innerHTML += `
+                        <tr>
+                            <td>${post.id}</td>
+                            <td>${post.user_id}</td>
+                            <td>${post.title}</td>
+                            <td>${post.content}</td>
+                            <td>${post.category}</td>
+                            <td>${post.created_at}</td>
+                            <td>${post.updated_at ?? '-'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger deleteTip" data-id="${post.id}"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>`;
+                        });
+                    });
+            }
+
+            // Open modal and save ID
+            document.addEventListener("click", function (e) {
+                if (e.target.closest(".deleteTip")) {
+                    const postId = e.target.closest(".deleteTip").dataset.id;
+                    document.getElementById("deletePostId").value = postId;
+                    $('#deleteReasonModal').modal('show');
+                }
+            });
+
+            // Handle delete with reason
+            document.getElementById("deleteForm").addEventListener("submit", function (e) {
+                e.preventDefault();
+                const reason = document.getElementById("deleteReason").value;
+                const postId = document.getElementById("deletePostId").value;
+
+                if (!reason || !postId) return;
+
+                postToTips({ action: "delete", id: postId, reason })
+                    .then(() => {
+                        $('#deleteReasonModal').modal('hide');
+                        loadTips();
+                    })
+                    .catch(console.error);
+            });
+
+            // Initial load
+            loadTips();
+        });
     </script>
+
 </body>
 
 </html>

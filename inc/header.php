@@ -21,6 +21,8 @@
     .header {
         width: 100%;
         background: rgba(0, 28, 46, 0.95);
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
     }
 
     .nav {
@@ -88,13 +90,6 @@
 
     .button:hover {
         background: #0088d6;
-    }
-
-    font-size: 1rem;
-    color: #fff;
-    border: none;
-    border-radius: 2rem;
-    cursor: pointer;
     }
 
     .anim-button button:hover {

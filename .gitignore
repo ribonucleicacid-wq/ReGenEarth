@@ -3,5 +3,7 @@ settings.json
 tests.php
 try.php
 testing.php
+.admin_tests.php
+.tip_tests.php
 .vscode
 .gitignore

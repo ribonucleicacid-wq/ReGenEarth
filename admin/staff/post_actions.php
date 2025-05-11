@@ -1,5 +1,5 @@
 <?php
-require_once '../src/db_connection.php'; // assumes $pdo is available
+require_once '../../src/db_connection.php'; // assumes $pdo is available
 header('Content-Type: application/json');
 
 $data = json_decode(file_get_contents('php://input'), true);
@@ -10,6 +10,7 @@ try {
         case 'list':
             $stmt = $pdo->query("CALL sp_list_posts()");
             echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+            $stmt->closeCursor(); // Required after CALL
             break;
 
         case 'delete':
@@ -22,6 +23,7 @@ try {
                 $stmt->bindParam(':reason', $reason, PDO::PARAM_STR);
                 $stmt->execute();
                 echo json_encode(['success' => true]);
+                $stmt->closeCursor();
             } else {
                 echo json_encode(['error' => 'Missing post ID or reason']);
             }

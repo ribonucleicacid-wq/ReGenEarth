@@ -154,19 +154,21 @@ $_SESSION['just_logged_in'] = false;
                         }
 
                         data.forEach(post => {
-                            tipTableBody.innerHTML += `
-                        <tr>
-                            <td>${post.id}</td>
-                            <td>${post.user_id}</td>
-                            <td>${post.title}</td>
-                            <td>${post.content}</td>
-                            <td>${post.category}</td>
-                            <td>${post.created_at}</td>
-                            <td>${post.updated_at ?? '-'}</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger deleteTip" data-id="${post.id}"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>`;
+                            tipTableBody.innerHTML += ` 
+                            <tr>
+                                <td>${post.post_id}</td>
+                                <td>${post.user_id}</td>
+                                <td>${post.title}</td>
+                                <td>${post.content}</td>
+                                <td>${post.topic}</td>
+                                <td>${post.created_at}</td>
+                                <td>${post.updated_at ?? '-'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger deleteTip" data-id="${post.post_id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
                         });
                     });
             }

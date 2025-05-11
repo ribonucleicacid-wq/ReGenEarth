@@ -1,7 +1,8 @@
 <?php
 include '../src/db_connection.php'; // Include the database connection class
 
-function getRandomTip($conn) {
+function getRandomTip($conn)
+{
     try {
         $stmt = $conn->prepare("CALL GetRandomDailyTip()");
         $stmt->execute();
@@ -12,9 +13,10 @@ function getRandomTip($conn) {
     }
 }
 
-function getGeneralTips($conn) {
+function getGeneralTips($conn)
+{
     try {
-        $stmt = $conn->prepare("CALL GetGeneralTips()");
+        $stmt = $conn->prepare("CALL GetRandomDailyTip()");
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_COLUMN);
         return $results ? $results : ['No general tips available at the moment.'];
@@ -29,9 +31,9 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'random';
 try {
     $db = new Database(); // Create a new instance of the Database class
     $conn = $db->getConnection(); // Get the PDO connection
-    
+
     header('Content-Type: application/json');
-    
+
     switch ($action) {
         case 'general':
             $tips = getGeneralTips($conn);

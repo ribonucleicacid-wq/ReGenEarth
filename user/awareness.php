@@ -1,5 +1,8 @@
 <?php
+session_start();
+
 include 'inc/header.php';
+include '../auth/user_only.php';
 ?>
 
 <!DOCTYPE html>
@@ -1284,7 +1287,7 @@ include 'inc/header.php';
             }
 
             // Function to create and display environmental data card
-            function createEnvironmentalDataCard(category) {
+            async function createEnvironmentalDataCard(category) {
                 const imageCard = document.querySelector(`.image-card[data-category="${category}"]`);
                 if (!imageCard) return;
 
@@ -1294,14 +1297,18 @@ include 'inc/header.php';
                     existingCard.remove();
                 }
 
-                // Only create card for categories with environmental data
-                if (!environmentalData[category]) return;
+                // Fetch real data for the category
+                const data = await fetchEnvironmentalData(category);
 
+                // Create the environmental data card
                 const envCard = document.createElement('div');
                 envCard.className = 'environmental-data-card';
                 envCard.innerHTML = `
-                    <h3>${environmentalData[category].name}</h3>
-                    <p>${environmentalData[category].getData()}</p>
+                    <h3>${category === 'pollution' ? 'Pollution Awareness' : 
+                        category === 'climate' ? 'Climate Change Impact' : 
+                        category === 'carbon' ? 'Carbon Emissions Insight' : 
+                        'Biodiversity Alert'}</h3>
+                    <p>${data}</p>
                 `;
 
                 // Style the card to appear within the image grid
@@ -1506,6 +1513,128 @@ include 'inc/header.php';
             // Optional: Add click to manually cycle tips
             tipCard.addEventListener('click', fetchAndDisplayTip);
         });
+
+        // Function to fetch real data from APIs
+        async function fetchEnvironmentalData(category) {
+            try {
+                const response = await fetch(`fetch_environmental_data.php?category=${category}`);
+                const data = await response.json();
+
+                if (category === 'pollution') {
+                    const pm2_5 = data.pm2_5 || 'N/A'; // PM2.5 level
+                    const pm10 = data.pm10 || 'N/A'; // PM10 level
+                    const aqi = data.aqi || 'N/A'; // Air Quality Index
+
+                    return `
+                        PM2.5: <strong>${pm2_5} µg/m³</strong><br>
+                        PM10: ${pm10} µg/m³<br>
+                        Air Quality Index: ${aqi}
+                    `;
+                } else if (category === 'climate') {
+                    const temp = data.main.temp || 'N/A'; // Current temperature
+                    const description = data.weather[0].description || 'N/A'; // Weather description
+
+                    return `
+                        Temperature: <strong>${temp.toFixed(1)}°C</strong><br>
+                        Condition: ${description}
+                    `;
+                } else if (category === 'carbon') {
+                    const co2Level = data.co2_level || 'N/A'; // CO2 level
+                    const unit = data.unit || 'ppm';
+
+                    return `
+                        CO2 Level: <strong>${co2Level} ${unit}</strong>
+                    `;
+                } else if (category === 'biodiversity') {
+                    const threatenedSpecies = data.threatened_species || 'N/A'; // Threatened species count
+                    const status = data.status || 'N/A';
+
+                    return `
+                        Threatened Species: <strong>${threatenedSpecies}</strong><br>
+                        Status: ${status}
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching environmental data:', error);
+                return 'Unable to fetch data at the moment.';
+            }
+        }
+
+        async function createEnvironmentalDataCard(category) {
+            const imageCard = document.querySelector(`.image-card[data-category="${category}"]`);
+            if (!imageCard) return;
+
+            // Remove existing environmental data card
+            const existingCard = imageCard.querySelector('.environmental-data-card');
+            if (existingCard) {
+                existingCard.remove();
+            }
+
+            // Fetch real data for the category
+            const data = await fetchEnvironmentalData(category);
+
+            // Create the environmental data card
+            const envCard = document.createElement('div');
+            envCard.className = 'environmental-data-card';
+            envCard.innerHTML = `
+                <h3>${category === 'pollution' ? 'Pollution Awareness' : 
+                    category === 'climate' ? 'Climate Change Impact' : 
+                    category === 'carbon' ? 'Carbon Emissions Insight' : 
+                    'Biodiversity Alert'}</h3>
+                <p>${data}</p>
+            `;
+
+            // Style the card to appear within the image grid
+            envCard.style.cssText = `
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                z-index: 10;
+                width: 250px;
+                max-width: 80%;
+                padding: 1rem;
+                background: linear-gradient(135deg, rgba(15, 45, 84, 0.9) 0%, rgba(12, 77, 80, 0.9) 100%);
+                color: #fff;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+                opacity: 1;
+                transform: translateY(0);
+                transition: all 0.5s ease;
+                cursor: pointer;
+            `;
+
+            // Add click to dismiss
+            envCard.addEventListener('click', (e) => {
+                e.stopPropagation();
+                envCard.style.opacity = '0';
+                envCard.style.transform = 'translateY(20px)';
+                setTimeout(() => envCard.remove(), 500);
+            });
+
+            // Append to the specific image card
+            imageCard.style.position = 'relative';
+            imageCard.appendChild(envCard);
+
+            // Auto-dismiss after 10 seconds
+            setTimeout(() => {
+                if (imageCard.contains(envCard)) {
+                    envCard.style.opacity = '0';
+                    envCard.style.transform = 'translateY(20px)';
+                    setTimeout(() => envCard.remove(), 500);
+                }
+            }, 10000);
+        }
+
+        // Attach event listeners to the "Learn More" buttons
+        document.querySelectorAll('.image-card').forEach((card) => {
+            const button = card.querySelector('.learn-more-btn');
+            const category = card.getAttribute('data-category');
+
+            button.addEventListener('click', () => {
+                createEnvironmentalDataCard(category);
+            });
+        });
     </script>
 </body>
 </html>
+

@@ -2,6 +2,56 @@
 session_start();
 include 'inc/header.php';
 include '../auth/user_only.php';
+require_once '../src/db_connection.php';
+
+$db = new Database();
+$conn = $db->getConnection();
+
+// Handle AJAX requests
+if (isset($_POST['action'])) {
+    $response = ['success' => false];
+
+    switch ($_POST['action']) {
+        case 'mark_read':
+            if (isset($_POST['notification_id'])) {
+                $stmt = $conn->prepare("CALL sp_mark_notification_read(?)");
+                $stmt->execute([$_POST['notification_id']]);
+                $response['success'] = true;
+            }
+            break;
+
+        case 'mark_all_read':
+            $stmt = $conn->prepare("CALL sp_mark_all_notifications_read(?)");
+            $stmt->execute([$_SESSION['user_id']]);
+            $response['success'] = true;
+            break;
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit();
+}
+
+// Get notifications for the current page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$limit = 10;
+
+// Get user's profile picture
+$stmt = $conn->prepare("SELECT profile_picture FROM users WHERE user_id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$user_data = $stmt->fetch(PDO::FETCH_ASSOC);
+$profile_picture = $user_data['profile_picture'] ?? 'default.jpg';
+
+$stmt = $conn->prepare("CALL sp_get_notifications(?, ?, ?)");
+$stmt->execute([$_SESSION['user_id'], $page, $limit]);
+$notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt->closeCursor();
+
+// Get total notifications count for pagination
+$stmt = $conn->prepare("SELECT COUNT(*) as total FROM notifications WHERE user_id = ?");
+$stmt->execute([$_SESSION['user_id']]);
+$total_count = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+$total_pages = ceil($total_count / $limit);
 ?>
 
  <!-- Main Content -->
@@ -34,264 +84,143 @@ include '../auth/user_only.php';
      <div class="table-responsive">
          <table class="table table-hover notification-table">
              <tbody>
-                 <!-- Page 1 Notifications -->
-                 <!-- Like Notification -->
-                 <tr class="unread" data-type="like">
+                <?php if (empty($notifications)): ?>
+                <tr>
+                    <td colspan="2" class="text-center py-5">
+                        <div class="empty-state">
+                            <i class="fas fa-bell-slash fa-4x mb-3"></i>
+                            <h4>No notifications yet</h4>
+                            <p class="text-muted">When you get notifications, they'll show up here</p>
+                         </div>
+                     </td>
+                 </tr>
+                <?php else: ?>
+                    <?php foreach ($notifications as $notification): 
+                        $data = json_decode($notification['notification_data'], true);
+                    ?>
+                    <tr class="<?= $notification['is_read'] ? '' : 'unread' ?>" data-type="<?= $notification['type'] ?>">
                      <td>
                          <div class="d-flex align-items-center">
+                                <?php if (!$notification['is_read']): ?>
                              <div class="unread-indicator"></div>
-                             <div class="notification-icon like mx-3">
-                                 <i class="fas fa-thumbs-up"></i>
+                                <?php endif; ?>
+                                <div class="notification-icon <?= $notification['type'] ?> mx-3">
+                                    <?php
+                                    $icon = '';
+                                    switch ($notification['type']) {
+                                        case 'like': $icon = 'thumbs-up'; break;
+                                        case 'comment': $icon = 'comment'; break;
+                                        case 'follow': $icon = 'user-plus'; break;
+                                        case 'mention': $icon = 'at'; break;
+                                        case 'badge': $icon = 'trophy'; break;
+                                        case 'action': $icon = 'leaf'; break;
+                                    }
+                                    ?>
+                                    <i class="fas fa-<?= $icon ?>"></i>
                              </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
+                                <img src="../uploads/members/<?= htmlspecialchars($notification['notifier_profile_picture'] ?? 'default.jpg') ?>" 
+                                     class="rounded-circle me-2" width="32" height="32" 
+                                     alt="<?= htmlspecialchars($notification['notifier_username']) ?>">
                              <div class="notification-content">
-                                 <div><strong>Maria Santos</strong> liked your eco-action post: <strong>Tree Planting</strong></div>
-                                 <small class="text-muted">2 hours ago</small>
+                                    <div>
+                                        <?php
+                                        switch ($notification['type']) {
+                                            case 'like':
+                                                echo "<strong>" . htmlspecialchars($notification['notifier_username']) . "</strong> liked your post";
+                                                if (isset($data['post_title'])) {
+                                                    echo ": <strong>" . htmlspecialchars($data['post_title']) . "</strong>";
+                                                }
+                                                break;
+                                            case 'comment':
+                                                echo "<strong>" . htmlspecialchars($notification['notifier_username']) . "</strong> commented on your post";
+                                                if (isset($data['comment_text'])) {
+                                                    echo ": <strong>\"" . htmlspecialchars($data['comment_text']) . "\"</strong>";
+                                                }
+                                                break;
+                                            case 'follow':
+                                                echo "<strong>" . htmlspecialchars($notification['notifier_username']) . "</strong> started following you";
+                                                break;
+                                            case 'mention':
+                                                echo "<strong>" . htmlspecialchars($notification['notifier_username']) . "</strong> mentioned you in a post";
+                                                break;
+                                            case 'badge':
+                                                echo "You earned the <strong>" . htmlspecialchars($data['badge_name']) . "</strong> badge! 🎉";
+                                                break;
+                                        }
+                                        ?>
+                             </div>
+                                    <small class="text-muted" data-timestamp="<?= $notification['created_at'] ?>"></small>
                              </div>
                          </div>
                      </td>
                      <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="like" data-id="123">View Post</button>
+                            <?php
+                            $buttonText = '';
+                            $buttonLink = '#';
+                            switch ($notification['type']) {
+                                case 'like':
+                                case 'comment':
+                                case 'mention':
+                                    $buttonText = 'View Post';
+                                    $buttonLink = isset($data['post_id']) ? "post.php?id=" . $data['post_id'] : '#';
+                                    break;
+                                case 'follow':
+                                    $buttonText = 'View Profile';
+                                    $buttonLink = "profile.php?user=" . urlencode($notification['notifier_username']);
+                                    break;
+                                case 'badge':
+                                    $buttonText = 'View Badge';
+                                    $buttonLink = "profile.php?tab=badges";
+                                    break;
+                            }
+                            ?>
+                            <button class="btn btn-sm btn-outline-secondary view-action" 
+                                    data-type="<?= $notification['type'] ?>" 
+                                    data-id="<?= $notification['notification_id'] ?>"
+                                    onclick="window.location.href='<?= $buttonLink ?>'">
+                                <?= $buttonText ?>
+                            </button>
                      </td>
                  </tr>
- 
-                 <!-- Comment Notification -->
-                 <tr class="unread" data-type="comment">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="unread-indicator"></div>
-                             <div class="notification-icon comment mx-3">
-                                 <i class="fas fa-comment"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>John Doe</strong> commented on your post: <strong>"Great initiative! Let's plant more trees together."</strong></div>
-                                 <small class="text-muted">5 hours ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="comment" data-id="456">View Comment</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Follow Notification -->
-                 <tr class="unread" data-type="follow">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="unread-indicator"></div>
-                             <div class="notification-icon follow mx-3">
-                                 <i class="fas fa-user-plus"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>Eco Warrior</strong> started following you</div>
-                                 <small class="text-muted">1 day ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="follow" data-id="ecowarrior">View Profile</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Badge Notification -->
-                 <tr class="unread" data-type="badge">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="unread-indicator"></div>
-                             <div class="notification-icon badge mx-3">
-                                 <i class="fas fa-trophy"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div>You earned the <strong>Gaianova</strong> badge! Congratulations!🎉</div>
-                                 <small class="text-muted">2 days ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="badge">View Badge</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Mention Notification -->
-                 <tr class="unread" data-type="mention">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="unread-indicator"></div>
-                             <div class="notification-icon mention mx-3">
-                                 <i class="fas fa-at"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>Green Team</strong> mentioned you in a post: <strong>"@YourName join us for the beach cleanup!"</strong></div>
-                                 <small class="text-muted">3 days ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="mention" data-id="789">View Mention</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Action Notification -->
-                 <tr class="unread" data-type="action">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="unread-indicator"></div>
-                             <div class="notification-icon action mx-3">
-                                 <i class="fas fa-leaf"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>New Eco Challenge</strong> available: <strong>Zero Waste Week</strong></div>
-                                 <small class="text-muted">1 week ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="action" data-id="zerowasteweek">Join Challenge</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Page 2 Notifications (Hidden by default) -->
-                 <!-- Like Notification -->
-                 <tr class="unread page-2" data-type="like" style="display: none;">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="unread-indicator"></div>
-                             <div class="notification-icon like mx-3">
-                                 <i class="fas fa-thumbs-up"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>Sarah Green</strong> liked your post: <strong>Recycling Tips</strong></div>
-                                 <small class="text-muted">1 week ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="like" data-id="124">View Post</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Comment Notification -->
-                 <tr class="unread page-2" data-type="comment" style="display: none;">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="unread-indicator"></div>
-                             <div class="notification-icon comment mx-3">
-                                 <i class="fas fa-comment"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>Eco Enthusiast</strong> replied to your comment: <strong>"Great tips! I'll try these at home."</strong></div>
-                                 <small class="text-muted">1 week ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="comment" data-id="457">View Reply</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Follow Notification -->
-                 <tr class="page-2" data-type="follow" style="display: none;">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="notification-icon follow mx-3">
-                                 <i class="fas fa-user-plus"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>Green Living</strong> started following you</div>
-                                 <small class="text-muted">2 weeks ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="follow" data-id="greenliving">View Profile</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Badge Notification -->
-                 <tr class="page-2" data-type="badge" style="display: none;">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="notification-icon badge mx-3">
-                                 <i class="fas fa-trophy"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div>You earned the <strong>Eco Champion</strong> badge! Keep it up!🌟</div>
-                                 <small class="text-muted">2 weeks ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="badge">View Badge</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Mention Notification -->
-                 <tr class="page-2" data-type="mention" style="display: none;">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="notification-icon mention mx-3">
-                                 <i class="fas fa-at"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>Eco Warriors Club</strong> mentioned you in a post: <strong>"@YourName check out our new recycling program!"</strong></div>
-                                 <small class="text-muted">3 weeks ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="mention" data-id="790">View Mention</button>
-                     </td>
-                 </tr>
- 
-                 <!-- Action Notification -->
-                 <tr class="page-2" data-type="action" style="display: none;">
-                     <td>
-                         <div class="d-flex align-items-center">
-                             <div class="notification-icon action mx-3">
-                                 <i class="fas fa-leaf"></i>
-                             </div>
-                             <img src="../uploads/members/sample profile.png" class="rounded-circle me-2" width="32" height="32">
-                             <div class="notification-content">
-                                 <div><strong>New Eco Challenge</strong> available: <strong>Plastic-Free Month</strong></div>
-                                 <small class="text-muted">1 month ago</small>
-                             </div>
-                         </div>
-                     </td>
-                     <td class="text-end" style="width: 100px;">
-                         <button class="btn btn-sm btn-outline-secondary view-action" data-type="action" data-id="plasticfree">Join Challenge</button>
-                     </td>
-                 </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
              </tbody>
          </table>
      </div>
  
+    <?php if ($total_pages > 1): ?>
      <!-- Pagination -->
      <nav aria-label="Notifications pagination" class="mt-4">
          <ul class="pagination justify-content-center">
-             <li class="page-item disabled" id="prevPage">
-                 <a class="page-link" href="#" tabindex="-1" aria-disabled="true">
+            <?php if ($page > 1): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?= $page - 1 ?>">
                      <i class="fas fa-chevron-left"></i>
                  </a>
              </li>
-             <li class="page-item active"><a class="page-link" href="#" data-page="1">1</a></li>
-             <li class="page-item"><a class="page-link" href="#" data-page="2">2</a></li>
-             <li class="page-item" id="nextPage">
-                 <a class="page-link" href="#">
+            <?php endif; ?>
+
+            <?php
+            $start = max(1, min($page - 2, $total_pages - 4));
+            $end = min($total_pages, $start + 4);
+            
+            for ($i = $start; $i <= $end; $i++):
+            ?>
+            <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+            </li>
+            <?php endfor; ?>
+
+            <?php if ($page < $total_pages): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?= $page + 1 ?>">
                      <i class="fas fa-chevron-right"></i>
                  </a>
              </li>
+            <?php endif; ?>
          </ul>
      </nav>
+    <?php endif; ?>
  </div>
  
  <style>
@@ -309,279 +238,98 @@ include '../auth/user_only.php';
      margin-bottom: 0.1rem;
  }
  
- .notification-table td {
-     padding: 1rem;
-     vertical-align: middle;
- }
- 
- .notification-table tbody tr {
-     position: relative;
-     transition: all 0.3s ease;
-     border-bottom: 1px solid rgba(153, 154, 156, 0.2);
-     cursor: pointer;
-     padding-left: 40px;
- }
- 
- .notification-table tbody tr:last-child {
+.notification-item {
+    border-bottom: 1px solid var(--bs-border-color);
+    transition: background-color 0.2s ease;
+}
+
+.notification-item:last-child {
      border-bottom: none;
  }
  
- .notification-table tbody tr:hover {
-     background-color: rgba(87, 175, 195, 0.1);
- }
- 
- /* Unread Indicator */
- .unread-indicator {
-     width: 10px;
-     height: 10px;
-     background-color: var(--moonstone);
+.notification-item.unread {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+.notification-item:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+.notification-indicator {
+    width: 8px;
+    height: 8px;
      border-radius: 50%;
-     display: inline-block;
-     position: absolute;
-     top: 50%;
-     left: 15px;
-     transform: translateY(-50%);
-     animation: pulse 2s infinite;
-     animation-delay: -1s;
-     box-shadow: 0 0 0 0 rgba(87, 175, 195, 0.7);
-     z-index: 1;
- }
- 
- @keyframes pulse {
-     0% {
-         transform: translateY(-50%) scale(1);
-         box-shadow: 0 0 0 0 rgba(87, 175, 195, 0.7);
-     }
-     70% {
-         transform: translateY(-50%) scale(1.3);
-         box-shadow: 0 0 0 8px rgba(87, 175, 195, 0);
-     }
-     100% {
-         transform: translateY(-50%) scale(1);
-         box-shadow: 0 0 0 0 rgba(87, 175, 195, 0);
-     }
- }
- 
- /* Notification Icon Container */
- .notification-icon {
-     position: relative;
-     width: 35px;
-     height: 35px;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     background-color: rgba(87, 175, 195, 0.1);
-     border-radius: 50%;
-     flex-shrink: 0;
-     margin-right: 10px;
-     margin-left: 20px;
- }
- 
- .notification-content {
-     flex: 1;
-     min-width: 200px;
-     max-width: 100%;
-     word-wrap: break-word;
-     overflow-wrap: break-word;
- }
- 
- .notification-content div {
-     margin-bottom: 0.25rem;
- }
- 
- .notification-content small {
-     color: var(--taupe-gray);
- }
- 
- /* Notification Icon Colors */
- .notification-icon.like { color: #4CAF50; }
- .notification-icon.comment { color: #2196F3; }
- .notification-icon.follow { color: #9C27B0; }
- .notification-icon.badge { color: #FFC107; }
- .notification-icon.mention { color: #E91E63; }
- .notification-icon.action { color: #00BCD4; }
- 
- .btn-outline-secondary {
-     border-color: var(--moonstone);
-     color: var(--silver);
-     transition: all 0.3s ease;
- }
- 
- .btn-outline-secondary:hover {
-     background-color: var(--moonstone);
+    margin-right: 15px;
+}
+
+.notification-indicator.unread {
+    background-color: #0d6efd;
+}
+
+.notification-avatar {
+    margin-right: 15px;
+}
+
+.notification-avatar img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+.notification-content {
+    margin-right: 15px;
+}
+
+.notification-text {
+    margin-bottom: 4px;
+}
+
+.notification-meta {
+    font-size: 0.875rem;
+}
+
+.empty-state {
+    color: var(--bs-secondary);
+    padding: 40px 20px;
+}
+
+.empty-state i {
+    color: var(--bs-secondary);
+    opacity: 0.5;
+}
+
+.filter-group .btn {
+    border-radius: 20px;
+    margin-right: 5px;
+    padding: 0.375rem 1rem;
+}
+
+.filter-group .btn.active {
+    background-color: #0d6efd;
      color: white;
- }
- 
- /* Filter Buttons Styling */
- .filter-group {
-     background-color: var(--prussian-blue);
-     padding: 0.5rem;
-     border-radius: 50px;
-     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
- }
- 
- .filter-btn {
-     background: transparent;
-     color: var(--silver);
-     border: none;
-     padding: 0.5rem 1.2rem;
-     margin: 0 0.2rem;
-     border-radius: 25px;
-     transition: all 0.3s ease;
-     display: flex;
-     align-items: center;
-     gap: 0.5rem;
- }
- 
- .filter-btn i {
-     font-size: 0.9rem;
- }
- 
- .filter-btn:hover {
-     background-color: rgba(87, 175, 195, 0.2);
-     color: var(--moonstone);
-     transform: translateY(-1px);
- }
- 
- .filter-btn.active {
-     background-color: var(--moonstone);
-     color: white;
-     box-shadow: 0 2px 8px rgba(87, 175, 195, 0.3);
- }
- 
- /* Mark All Read Button */
- .mark-all-btn {
-     background-color: var(--moonstone);
-     color: white;
-     border: none;
-     padding: 0.5rem 1.2rem;
-     border-radius: 25px;
-     transition: all 0.3s ease;
-     display: flex;
-     align-items: center;
-     gap: 0.5rem;
-     box-shadow: 0 2px 8px rgba(87, 175, 195, 0.3);
- }
- 
- .mark-all-btn:hover {
-     background-color: #489fb5;
-     transform: translateY(-1px);
-     box-shadow: 0 4px 12px rgba(87, 175, 195, 0.4);
- }
- 
- /* Pagination Styling */
- .pagination {
-     margin-top: 0;
-     margin-bottom: 0;
- }
- 
- .page-link {
-     background-color: var(--prussian-blue);
-     color: var(--silver);
-     border: none;
-     padding: 0.5rem 1rem;
-     margin: 0 0.2rem;
-     border-radius: 8px;
-     transition: all 0.3s ease;
- }
- 
- .page-link:hover {
-     background-color: rgba(87, 175, 195, 0.2);
-     color: var(--moonstone);
-     transform: translateY(-1px);
- }
- 
- .page-item.active .page-link {
-     background-color: var(--moonstone);
-     color: white;
-     box-shadow: 0 2px 8px rgba(87, 175, 195, 0.3);
- }
- 
- .page-item.disabled .page-link {
-     background-color: rgba(153, 154, 156, 0.1);
-     color: var(--taupe-gray);
- }
- 
- /* Mobile adjustments */
- @media (max-width: 576px) {
-     .container.mt-4 {
-         margin-top: 0.75rem !important;
-     }
-     
-     .notification-table {
-         margin-bottom: 0.05rem;
-     }
-     
-     .page-link {
-         padding: 0.4rem 0.8rem;
-         font-size: 0.9rem;
-     }
-     
-     .notification-table tbody tr {
-         padding-left: 35px;
-     }
-     
-     .unread-indicator {
-         width: 8px;
-         height: 8px;
-         left: 12px;
-     }
-     
-     .notification-icon {
-         margin-left: 15px;
-     }
- }
- 
- @media (max-width: 768px) {
-     .notification-table {
-         font-size: 0.9rem;
-     }
-     
-     .notification-table td {
-         padding: 0.75rem;
-     }
-     
-     .notification-icon {
-         width: 30px;
-         height: 30px;
-     }
-     
-     .btn-sm {
-         padding: 0.25rem 0.5rem;
-         font-size: 0.8rem;
-     }
-     
-     .filter-group {
-         flex-wrap: wrap;
-         justify-content: center;
-         padding: 0.3rem;
-     }
-     
-     .filter-btn {
-         padding: 0.4rem 0.8rem;
-         font-size: 0.9rem;
-     }
-     
-     .mark-all-btn {
-         padding: 0.4rem 0.8rem;
-         font-size: 0.9rem;
-     }
-     
-     .page-link {
-         padding: 0.4rem 0.8rem;
-         font-size: 0.9rem;
-     }
- }
- 
- @media (max-width: 576px) {
-     .unread-indicator {
-         width: 8px;
-         height: 8px;
-         left: -1px;
-     }
-     
-     .notification-table tbody tr {
-         padding-left: 15px;
+}
+
+#markAllRead {
+    border-radius: 20px;
+}
+
+.notification-actions {
+    white-space: nowrap;
+}
+
+.notification-actions .btn {
+    border-radius: 20px;
+    padding: 0.25rem 1rem;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .notification-item.unread {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    
+    .notification-item:hover {
+        background-color: rgba(255,255,255,0.05);
      }
  }
  </style>
@@ -589,279 +337,105 @@ include '../auth/user_only.php';
  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
  <script>
  document.addEventListener('DOMContentLoaded', function() {
-     // Function to update notification states in both table and dropdown
-     function updateNotificationStates() {
-         // Update table states
-         const unreadRows = document.querySelectorAll('.notification-table tbody tr.unread');
-         const unreadCount = unreadRows.length;
-         
-         // Update badge count
-         const badge = document.querySelector('.notification-badge');
-         if (badge) {
-             badge.textContent = unreadCount;
-             badge.style.display = unreadCount > 0 ? 'block' : 'none';
-         }
- 
-         // Update dropdown states (if it exists)
-         const dropdownItems = document.querySelectorAll('.notification-item-preview');
-         if (dropdownItems.length > 0) {
-             dropdownItems.forEach((item, index) => {
-                 const tableRow = document.querySelector(`.notification-table tbody tr:nth-child(${index + 1})`);
-                 if (tableRow) {
-                     if (tableRow.classList.contains('unread')) {
-                         item.classList.add('unread');
-                     } else {
-                         item.classList.remove('unread');
-                     }
-                 }
-             });
-         }
- 
-         // Store the unread state in localStorage for cross-page synchronization
-         localStorage.setItem('unreadNotifications', unreadCount);
-     }
- 
-     // Initial state update
-     updateNotificationStates();
- 
-     // Listen for storage events to sync across tabs/pages
-     window.addEventListener('storage', function(e) {
-         if (e.key === 'unreadNotifications') {
-             updateNotificationStates();
-         }
-     });
- 
-     // Handle action button clicks
-     document.querySelectorAll('.view-action').forEach(button => {
-         button.addEventListener('click', function(e) {
-             e.stopPropagation();
-             const type = this.getAttribute('data-type');
-             const id = this.getAttribute('data-id');
-             
-             let url = '';
-             let title = '';
-             let text = '';
-             
-             switch(type) {
-                 case 'like':
-                     title = 'Viewing Post';
-                     text = 'Redirecting to the liked post...';
-                     url = `post.php?id=${id}`;
-                     break;
-                 case 'comment':
-                     title = 'Viewing Comment';
-                     text = 'Redirecting to the comment...';
-                     url = `post.php?id=${id.split('-')[0]}#comment-${id.split('-')[1]}`;
-                     break;
-                 case 'follow':
-                     title = 'Viewing Profile';
-                     text = 'Redirecting to the user profile...';
-                     url = `profile.php?user=${id}`;
-                     break;
-                 case 'badge':
-                     title = 'Viewing Badge';
-                     text = 'Redirecting to your badges...';
-                     url = 'profile.php?tab=badges';
-                     break;
-                 case 'mention':
-                     title = 'Viewing Mention';
-                     text = 'Redirecting to the post where you were mentioned...';
-                     url = `post.php?id=${id}`;
-                     break;
-                 case 'action':
-                     title = 'Joining Challenge';
-                     text = 'You are joining the Zero Waste Week challenge!';
-                     url = `challenges.php?id=${id}`;
-                     break;
-             }
-             
-             Swal.fire({
-                 title: title,
-                 text: text,
-                 icon: 'info',
-                 showConfirmButton: false,
-                 timer: 1500
-             }).then(() => {
-                 window.location.href = url;
+    // Format timestamps
+    function formatTimeAgo(date) {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+
+        if (diffInSeconds < 60) return 'Just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+
+        return date.toLocaleDateString('default', { month: 'short', day: 'numeric' });
+    }
+
+    document.querySelectorAll('[data-timestamp]').forEach(element => {
+        const timestamp = new Date(element.dataset.timestamp);
+        element.textContent = formatTimeAgo(timestamp);
+    });
+
+    // Filter functionality
+    document.querySelectorAll('.filter-group .btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active state
+            document.querySelectorAll('.filter-group .btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // Filter notifications
+            const filter = this.dataset.filter;
+            document.querySelectorAll('.notification-item').forEach(item => {
+                if (filter === 'all' || 
+                    (filter === 'unread' && item.classList.contains('unread')) ||
+                    item.dataset.type === filter) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
              });
          });
      });
  
-     const itemsPerPage = 6;
-     let currentPage = 1;
-     let currentFilter = 'all';
-     const totalPages = 2; // Since we have 12 notifications total
- 
-     function showPage(page, filter) {
-         // Hide all notifications
-         document.querySelectorAll('.notification-table tbody tr').forEach(tr => {
-             tr.style.display = 'none';
-         });
- 
-         // Get all notifications that match the current filter
-         let filteredNotifications = Array.from(document.querySelectorAll('.notification-table tbody tr'));
-         
-         switch(filter) {
-             case 'unread':
-                 filteredNotifications = filteredNotifications.filter(tr => tr.classList.contains('unread'));
-                 break;
-             case 'mentions':
-                 filteredNotifications = filteredNotifications.filter(tr => tr.getAttribute('data-type') === 'mention');
-                 break;
-             case 'follows':
-                 filteredNotifications = filteredNotifications.filter(tr => tr.getAttribute('data-type') === 'follow');
-                 break;
-             case 'badges':
-                 filteredNotifications = filteredNotifications.filter(tr => tr.getAttribute('data-type') === 'badge');
-                 break;
-         }
- 
-         // Calculate total pages based on filtered notifications
-         const totalFilteredPages = Math.ceil(filteredNotifications.length / itemsPerPage);
-         
-         // Show notifications for current page
-         const startIndex = (page - 1) * itemsPerPage;
-         const endIndex = startIndex + itemsPerPage;
-         
-         filteredNotifications.slice(startIndex, endIndex).forEach(tr => {
-             tr.style.display = '';
-         });
- 
-         // Update pagination buttons
-         document.querySelectorAll('.page-link[data-page]').forEach(link => {
-             const pageNum = parseInt(link.getAttribute('data-page'));
-             link.parentElement.classList.remove('active');
-             if (pageNum === page) {
-                 link.parentElement.classList.add('active');
-             }
-             // Hide page numbers that exceed total filtered pages
-             link.parentElement.style.display = pageNum <= totalFilteredPages ? '' : 'none';
-         });
- 
-         // Update prev/next buttons
-         document.getElementById('prevPage').classList.toggle('disabled', page === 1);
-         document.getElementById('nextPage').classList.toggle('disabled', page === totalFilteredPages);
-     }
- 
-     // Filter functionality
-     const filterButtons = document.querySelectorAll('[data-filter]');
-     
-     filterButtons.forEach(button => {
-         button.addEventListener('click', function() {
-             const filter = this.getAttribute('data-filter');
-             
-             filterButtons.forEach(btn => btn.classList.remove('active'));
-             this.classList.add('active');
- 
-             currentFilter = filter;
-             currentPage = 1; // Reset to first page when changing filter
-             showPage(currentPage, filter);
-         });
-     });
- 
-     // Handle page clicks
-     document.querySelectorAll('.page-link[data-page]').forEach(link => {
-         link.addEventListener('click', function(e) {
-             e.preventDefault();
-             const page = parseInt(this.getAttribute('data-page'));
-             if (page !== currentPage) {
-                 currentPage = page;
-                 showPage(currentPage, currentFilter);
+    // Mark as read functionality
+    document.querySelectorAll('.notification-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            if (!e.target.closest('.notification-actions')) {
+                const id = this.dataset.id;
+                fetch('notifications.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=mark_read&notification_id=${id}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.classList.remove('unread');
+                        const indicator = this.querySelector('.notification-indicator');
+                        if (indicator) indicator.classList.remove('unread');
+                        updateUnreadCount();
+                    }
+                });
              }
          });
      });
- 
-     // Handle prev/next clicks
-     document.getElementById('prevPage').addEventListener('click', function(e) {
-         e.preventDefault();
-         if (currentPage > 1) {
-             currentPage--;
-             showPage(currentPage, currentFilter);
-         }
-     });
- 
-     document.getElementById('nextPage').addEventListener('click', function(e) {
-         e.preventDefault();
-         const filteredNotifications = Array.from(document.querySelectorAll('.notification-table tbody tr')).filter(tr => {
-             switch(currentFilter) {
-                 case 'unread': return tr.classList.contains('unread');
-                 case 'mentions': return tr.getAttribute('data-type') === 'mention';
-                 case 'follows': return tr.getAttribute('data-type') === 'follow';
-                 case 'badges': return tr.getAttribute('data-type') === 'badge';
-                 default: return true;
-             }
-         });
-         const totalFilteredPages = Math.ceil(filteredNotifications.length / itemsPerPage);
-         
-         if (currentPage < totalFilteredPages) {
-             currentPage++;
-             showPage(currentPage, currentFilter);
-         }
-     });
- 
-     // Show first page initially
-     showPage(1, 'all');
  
      // Mark all as read functionality
-     document.getElementById('markAllRead').addEventListener('click', function() {
-         Swal.fire({
-             title: 'Mark all as read?',
-             text: "This will mark all notifications as read.",
-             icon: 'question',
-             showCancelButton: true,
-             confirmButtonColor: '#57AFC3',
-             cancelButtonColor: '#6c757d',
-             confirmButtonText: 'Yes, mark all as read'
-         }).then((result) => {
-             if (result.isConfirmed) {
-                 const unreadRows = document.querySelectorAll('.notification-table tbody tr.unread');
-                 unreadRows.forEach(row => {
-                     row.classList.remove('unread');
-                     const indicator = row.querySelector('.unread-indicator');
-                     if (indicator) {
-                         indicator.style.display = 'none';
-                     }
- 
-                     // If on unread filter, hide the row
-                     const activeFilter = document.querySelector('[data-filter].active');
-                     if (activeFilter && activeFilter.getAttribute('data-filter') === 'unread') {
-                         row.style.display = 'none';
-                     }
-                 });
- 
-                 // Update states in both table and dropdown
-                 updateNotificationStates();
- 
-                 Swal.fire(
-                     'Success!',
-                     'All notifications have been marked as read.',
-                     'success'
-                 );
+    const markAllReadBtn = document.getElementById('markAllRead');
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function() {
+            fetch('notifications.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=mark_all_read'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                        const indicator = item.querySelector('.notification-indicator');
+                        if (indicator) indicator.classList.remove('unread');
+                    });
+                    updateUnreadCount();
              }
          });
      });
- 
-     // Individual row click to mark as read
-     document.querySelectorAll('.notification-table tbody tr').forEach(row => {
-         row.addEventListener('click', function(e) {
-             if (!e.target.closest('button') && this.classList.contains('unread')) {
-                 this.classList.remove('unread');
-                 const indicator = this.querySelector('.unread-indicator');
-                 if (indicator) {
-                     indicator.style.display = 'none';
-                 }
- 
-                 // If on unread filter, hide the row
-                 const activeFilter = document.querySelector('[data-filter].active');
-                 if (activeFilter && activeFilter.getAttribute('data-filter') === 'unread') {
-                     this.style.display = 'none';
-                 }
- 
-                 // Update states in both table and dropdown
-                 updateNotificationStates();
-             }
-         });
-     });
+    }
+
+    function updateUnreadCount() {
+        const unreadCount = document.querySelectorAll('.notification-item.unread').length;
+        const badge = document.querySelector('.notification-badge');
+        if (badge) {
+            badge.textContent = unreadCount;
+            badge.style.display = unreadCount > 0 ? '' : 'none';
+        }
+    }
  });
  </script>
  

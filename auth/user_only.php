@@ -1,6 +1,13 @@
 <?php
 // auth/user_only.php
 
+if (!isset($_SESSION['user_id'])) {
+    header('Location: ../auth/login.php');
+    exit();
+}
+
+$user_id = $_SESSION['user_id'];
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'user') {
     header("Location: ../landing_page.php");
     exit();

@@ -403,40 +403,55 @@ if (isset($_GET['search'])) {
             const userCard = button.closest('.user-card');
             const username = userCard.querySelector('.user-info strong').textContent;
             const profilePic = userCard.querySelector('img').src;
-            
-            if (action === 'follow') {
-                // Add to followed 
-                followedUsers.push(userId);
-                
-                // Add to Following 
-                const followingList = document.getElementById('followingList');
-                followingList.insertAdjacentHTML('beforeend', createUserCard(userId, username, profilePic, true));
-                
-                // Update button 
-                button.textContent = 'Unfollow';
-                button.className = 'button unfollow';
-                button.onclick = function() { toggleFollow(this, userId, 'unfollow'); };
-                
-                showMessage(`Successfully followed ${username}!`, 'success');
-            } else {
-                // Remove from followed users
-                followedUsers = followedUsers.filter(id => id !== userId);
-                
-                // Remove from Following tab
-                const followingList = document.getElementById('followingList');
-                const cardToRemove = followingList.querySelector(`[data-user-id="${userId}"]`);
-                if (cardToRemove) {
-                    cardToRemove.classList.add('fade-out');
-                    setTimeout(() => cardToRemove.remove(), 300);
+            fetch('ajax/follow_user.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_id=${userId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.following) {
+                        // Add to followed users
+                        followedUsers.push(userId);
+
+                        // Add to Following list
+                        const followingList = document.getElementById('followingList');
+                        followingList.insertAdjacentHTML('beforeend', createUserCard(userId, username, profilePic, true));
+
+                        // Update button
+                        button.textContent = 'Unfollow';
+                        button.className = 'button unfollow';
+                        button.onclick = function() { toggleFollow(this, userId, 'unfollow'); };
+
+                        showMessage(`Successfully followed ${username}!`, 'success');
+                    } else {
+                        // Remove from followed users
+                        followedUsers = followedUsers.filter(id => id !== userId);
+
+                        // Remove from Following list
+                        const followingCard = document.querySelector(`#followingList .user-card[data-user-id="${userId}"]`);
+                        if (followingCard) {
+                            followingCard.remove();
+                        }
+
+                        // Update button
+                        button.textContent = 'Follow';
+                        button.className = 'button follow';
+                        button.onclick = function() { toggleFollow(this, userId, 'follow'); };
+
+                        showMessage(`Successfully unfollowed ${username}!`, 'success');
+                    }
+                } else {
+                    showMessage('Failed to update follow status. Please try again.', 'error');
                 }
-                
-                // Update button in current view
-                button.textContent = 'Follow';
-                button.className = 'button follow';
-                button.onclick = function() { toggleFollow(this, userId, 'follow'); };
-                
-                showMessage(`Unfollowed ${username}`, 'success');
-            }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('An error occurred. Please try again.', 'error');
+            });
         }
 
         // Tab switching functionality

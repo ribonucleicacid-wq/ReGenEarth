@@ -1,5 +1,9 @@
 <?php
 include '../auth/user_only.php';
+require_once '../src/db_connection.php';
+
+$db = new Database();
+$conn = $db->getConnection();
 
 $user_id = $_SESSION['user_id'] ?? null;
 $username = $_SESSION['username'] ?? null;
@@ -233,15 +237,13 @@ $role = $_SESSION['role'] ?? null;
             position: absolute;
             top: -5px;
             right: -5px;
-            padding: 0.25em 0.4em;
-            font-size: 0.75em;
-            line-height: 1;
-            border-radius: 50%;
-            background-color: #dc3545;
+            background-color: #ff4444;
             color: white;
-            min-width: 1em;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            min-width: 18px;
             text-align: center;
-            transform: scale(0.9);
         }
 
         .d-flex.align-items-center {
@@ -573,6 +575,7 @@ $role = $_SESSION['role'] ?? null;
             gap: 0.3rem;
             transition: color 0.3s ease;
             white-space: nowrap;
+            position: relative;
         }
 
         .mark-all-read-btn {
@@ -649,13 +652,29 @@ $role = $_SESSION['role'] ?? null;
                         ?>
                         <a class="nav-link" href="notifications.php">
                             <i class="fas fa-bell"></i>
-                            <span class="badge badge-danger notification-badge">1</span>
+                            <?php
+                            // Get unread notifications count
+                            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = FALSE");
+                            $stmt->execute([$_SESSION['user_id']]);
+                            $unread_count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+                            
+                            if ($unread_count > 0): ?>
+                                <span class="notification-badge"><?= $unread_count ?></span>
+                            <?php endif; ?>
                         </a>
                         <?php else: ?>
                         <!-- On notifications page, bell icon links directly to notifications page -->
                         <a class="nav-link" href="notifications.php">
                             <i class="fas fa-bell"></i>
-                            <span class="badge badge-danger notification-badge">1</span>
+                            <?php
+                            // Get unread notifications count
+                            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = FALSE");
+                            $stmt->execute([$_SESSION['user_id']]);
+                            $unread_count = $stmt->fetch(PDO::FETCH_ASSOC)['count'];
+                            
+                            if ($unread_count > 0): ?>
+                                <span class="notification-badge"><?= $unread_count ?></span>
+                            <?php endif; ?>
                         </a>
                         <?php endif; ?>
                     </div>

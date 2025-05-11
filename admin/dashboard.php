@@ -24,6 +24,26 @@ try {
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
 }
+
+$climateChangeCount = 0;
+$pollutionCount = 0;
+$biodiversityLossCount = 0;
+
+try {
+    $stmt = $conn->prepare("CALL GetPostCountsPerTopic()");
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result) {
+        $climateChangeCount = $result['Climate Change Posts'];
+        $pollutionCount = $result['Pollution Posts'];
+        $biodiversityLossCount = $result['Biodiversity Loss Posts'];
+    }
+    $stmt->closeCursor();
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -75,7 +95,6 @@ try {
             top: 0;
             background: var(--prussian-blue);
             z-index: 100;
-            padding: 20px 0;
         }
 
         .dashboard-header-sticky h2 {
@@ -220,7 +239,9 @@ try {
                         <div class="card-body">
                             <div>
                                 <h5 class="card-title">Climate Change</h5>
-                                <h2 id="climateCount">0</h2>
+                                <h2 id="climateCount">
+                                    <?php echo $climateChangeCount; ?>
+                                </h2>
                             </div>
                             <div class="icon-container">
                                 <i class="fas fa-globe-americas fa-2x"></i>
@@ -234,7 +255,9 @@ try {
                         <div class="card-body">
                             <div>
                                 <h5 class="card-title">Pollution</h5>
-                                <h2 id="pollutionCount">0</h2>
+                                <h2 id="pollutionCount">
+                                    <?php echo $pollutionCount; ?>
+                                </h2>
                             </div>
                             <div class="icon-container">
                                 <i class="fas fa-trash-alt fa-2x"></i>
@@ -248,7 +271,9 @@ try {
                         <div class="card-body">
                             <div>
                                 <h5 class="card-title">Biodiversity Loss</h5>
-                                <h2 id="biodiversityCount">0</h2>
+                                <h2 id="biodiversityCount">
+                                    <?php echo $biodiversityLossCount; ?>
+                                </h2>
                             </div>
                             <div class="icon-container">
                                 <i class="fas fa-tree fa-2x"></i>
@@ -274,21 +299,6 @@ try {
     </div>
 
     <script>
-        // Sample values
-        const dashboardData = {
-            users: 1240,
-            admins: 12,
-            posts: {
-                climate: 198,
-                pollution: 132,
-                biodiversity: 89
-            }
-        };
-
-        // Fill numbers
-        document.getElementById("climateCount").textContent = dashboardData.posts.climate;
-        document.getElementById("pollutionCount").textContent = dashboardData.posts.pollution;
-        document.getElementById("biodiversityCount").textContent = dashboardData.posts.biodiversity;
 
         // Sample chart data
         let lineChart;

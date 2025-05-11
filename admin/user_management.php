@@ -148,6 +148,11 @@ $_SESSION['just_logged_in'] = false;
             outline: none;
             border-color: var(--moonstone);
         }
+
+        .modal-content {
+            background-color: var(--rich-black);
+            color: var(--silver);
+        }
     </style>
 </head>
 
@@ -266,8 +271,8 @@ $_SESSION['just_logged_in'] = false;
                             <td>${user.created_at}</td>
                             <td>${user.updated_at}</td>
                             <td>
-                                <button class="btn btn-sm btn-warning editUser" data-id="${user.user_id}">Edit</button>
-                                <button class="btn btn-sm btn-danger deleteUser" data-id="${user.user_id}">Delete</button>
+                                <button class="btn btn-sm btn-warning editUser" data-id="${user.user_id}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-danger deleteUser" data-id="${user.user_id}"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>
                     `);

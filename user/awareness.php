@@ -1264,30 +1264,24 @@ include '../auth/user_only.php';
                 'climate': {
                     name: 'Climate Change Impact',
                     getData: () => {
-                        const tempAnomaly = 1.1 + Math.random() * 0.2;
-                        const severity = tempAnomaly > 1.5 ? 'Critical' : 'Significant';
-                        return `Global Temp Rise: <strong>${tempAnomaly.toFixed(2)}°C</strong><br>Impact: ${severity}`;
+                        return `Global Temp Rise: <strong>1.2°C</strong><br>Impact: Significant`;
                     }
                 },
                 'pollution': {
                     name: 'Pollution Awareness',
                     getData: () => {
-                        const pollutionLevel = 35 + Math.random() * 20;
-                        const category = getPollutionCategory(pollutionLevel);
-                        return `Air Quality Index: <strong>${pollutionLevel.toFixed(2)} µg/m³</strong><br>Status: ${category}`;
+                        return `Air Quality Index: <strong>45.3 µg/m³</strong><br>Status: Unhealthy for Sensitive Groups 🟠`;
                     }
                 },
                 'biodiversity': {
                     name: 'Biodiversity Alert',
                     getData: () => {
-                        const threatenedSpecies = 40000 + Math.floor(Math.random() * 1000);
-                        const riskLevel = threatenedSpecies > 41000 ? 'High Risk' : 'Moderate Risk';
-                        return `Threatened Species: <strong>${threatenedSpecies}</strong><br>Conservation Status: ${riskLevel}`;
+                        return `Threatened Species: <strong>40,500</strong><br>Conservation Status: High Risk`;
                     }
                 },
             };
 
-            // Pollution level categorization
+            // Pollution level categorization (kept for potential future use)
             function getPollutionCategory(value) {
                 if (value <= 12) return 'Good 🟢';
                 if (value <= 35.4) return 'Moderate 🟡';

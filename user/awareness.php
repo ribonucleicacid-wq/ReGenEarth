@@ -871,17 +871,24 @@ include '../auth/user_only.php';
             bottom: 10px;
             right: 10px;
             z-index: 10;
-            width: 240px;
+            width: 250px;
             max-width: 80%;
             padding: 1rem;
             background: linear-gradient(135deg, rgba(15, 45, 84, 0.9) 0%, rgba(12, 77, 80, 0.9) 100%);
             color: #fff;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            opacity: 1;
-            transform: translateY(0);
-            transition: all 0.5s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
             cursor: pointer;
+        }
+
+        .image-card:hover .environmental-data-card {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
         }
 
         .environmental-data-card h3 {
@@ -889,6 +896,7 @@ include '../auth/user_only.php';
             margin-bottom: 0.5rem;
             color: #00a2ff;
             text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         .environmental-data-card p {
@@ -896,6 +904,17 @@ include '../auth/user_only.php';
             line-height: 1.0;
             text-align: center;
             opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        body.light-mode .environmental-data-card h3 {
+            color: #0088d6;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        body.light-mode .environmental-data-card p {
+            color: #132F43;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
         }
 
         .environmental-data-card p strong {
@@ -1283,6 +1302,10 @@ include '../auth/user_only.php';
                 const imageCard = document.querySelector(`.image-card[data-category="${category}"]`);
                 if (!imageCard) return;
 
+                // Skip creating environmental data card for tripleplanetary1.jpg
+                const image = imageCard.querySelector('img');
+                if (image && image.src.includes('tripleplanetary1.jpg')) return;
+
                 // Remove existing environmental data card
                 const existingCard = imageCard.querySelector('.environmental-data-card');
                 if (existingCard) {
@@ -1297,51 +1320,15 @@ include '../auth/user_only.php';
                 envCard.className = 'environmental-data-card';
                 envCard.innerHTML = `
                     <h3>${category === 'pollution' ? 'Pollution Awareness' : 
-                        category === 'climate' ? 'Climate Change' : 
+                        category === 'climate' ? 'Climate Change Impact' : 
                         category === 'carbon' ? 'Carbon Emissions Insight' : 
                         'Biodiversity Alert'}</h3>
                     <p>${data}</p>
                 `;
 
-                // Style the card to appear within the image grid
-                envCard.style.cssText = `
-                    position: absolute;
-                    bottom: 10px;
-                    right: 10px;
-                    z-index: 10;
-                    width: 250px;
-                    max-width: 80%;
-                    padding: 1rem;
-                    background: linear-gradient(135deg, rgba(15, 45, 84, 0.9) 0%, rgba(12, 77, 80, 0.9) 100%);
-                    color: #fff;
-                    border-radius: 12px;
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-                    opacity: 1;
-                    transform: translateY(0);
-                    transition: all 0.5s ease;
-                    cursor: pointer;
-                `;
-
-                // Add click to dismiss
-                envCard.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    envCard.style.opacity = '0';
-                    envCard.style.transform = 'translateY(20px)';
-                    setTimeout(() => envCard.remove(), 500);
-                });
-
                 // Append to the specific image card
                 imageCard.style.position = 'relative';
                 imageCard.appendChild(envCard);
-
-                // Auto-dismiss after 10 seconds
-                setTimeout(() => {
-                    if (imageCard.contains(envCard)) {
-                        envCard.style.opacity = '0';
-                        envCard.style.transform = 'translateY(20px)';
-                        setTimeout(() => envCard.remove(), 500);
-                    }
-                }, 10000);
             }
 
             imageCards.forEach(card => {

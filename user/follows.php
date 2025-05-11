@@ -105,7 +105,7 @@ if (isset($_GET['search'])) {
             color: var(--silver);
             font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 20px;
+            /* padding: 20px; */
         }
 
         .center-wrapper {
@@ -117,7 +117,7 @@ if (isset($_GET['search'])) {
         .follow-page {
             background-color: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            padding: 20px;
+            /* padding: 20px; */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }

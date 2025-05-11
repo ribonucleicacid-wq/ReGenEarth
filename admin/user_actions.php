@@ -28,22 +28,6 @@ try {
             echo json_encode($users);
             break;
 
-        // case 'searchUser':
-        //     $stmt = $conn->prepare("CALL SearchUser(:userRole, :searchTerm)");
-        //     $stmt->bindValue(':userRole', 'user');
-        //     $stmt->bindValue(':searchTerm', $_POST['searchTerm']);
-        //     $stmt->execute();
-        //     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        //     // Format date and bio
-        //     foreach ($users as &$user) {
-        //         $user['bio'] = $user['bio'] ?: 'The user is lazy to put bio.';
-        //         $user['created_at'] = formatDate($user['created_at']);
-        //         $user['updated_at'] = formatDate($user['updated_at']);
-        //     }
-
-        //     echo json_encode($users);
-        //     break;
 
         case 'searchUser':
             $userRole = $_POST['userRole'] ?? 'user';
@@ -85,6 +69,8 @@ try {
                 ':password_hash' => password_hash($defaultPassword, PASSWORD_DEFAULT),
                 ':bio' => $_POST['bio']
             ]);
+            require_once '../src/sfunctions.php';
+            sendNewUserCredentialsEmail($email, $username, $defaultPassword);
             echo json_encode(['status' => 'success']);
             break;
 

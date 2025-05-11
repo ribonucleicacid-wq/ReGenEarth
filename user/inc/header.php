@@ -256,11 +256,11 @@ $role = $_SESSION['role'] ?? null;
             .notifications-nav {
                 margin: 0.5rem 0;
             }
-            
+
             .navbar-nav {
                 gap: 0.5rem;
             }
-            
+
             .d-flex.align-items-center {
                 margin-top: 0.5rem;
             }
@@ -280,12 +280,12 @@ $role = $_SESSION['role'] ?? null;
 
         .dropdown-footer {
             padding: 8px;
-            border-top: 1px solid rgba(0,0,0,0.1);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .notification-item-preview {
             padding: 12px 12px 12px 40px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             display: block;
             text-decoration: none;
             color: inherit;
@@ -294,7 +294,7 @@ $role = $_SESSION['role'] ?? null;
         }
 
         .notification-item-preview:hover {
-            background-color: rgba(0,0,0,0.05);
+            background-color: rgba(0, 0, 0, 0.05);
         }
 
         .notification-item-preview.unread {
@@ -322,10 +322,12 @@ $role = $_SESSION['role'] ?? null;
                 transform: translateY(-50%) scale(1);
                 box-shadow: 0 0 0 0 rgba(87, 175, 195, 0.7);
             }
+
             70% {
                 transform: translateY(-50%) scale(1.3);
                 box-shadow: 0 0 0 8px rgba(87, 175, 195, 0);
             }
+
             100% {
                 transform: translateY(-50%) scale(1);
                 box-shadow: 0 0 0 0 rgba(87, 175, 195, 0);
@@ -415,10 +417,12 @@ $role = $_SESSION['role'] ?? null;
                 transform: scale(1);
                 box-shadow: 0 0 0 0 rgba(87, 175, 195, 0.7);
             }
+
             70% {
                 transform: scale(1.2);
                 box-shadow: 0 0 0 6px rgba(87, 175, 195, 0);
             }
+
             100% {
                 transform: scale(1);
                 box-shadow: 0 0 0 0 rgba(87, 175, 195, 0);
@@ -431,9 +435,17 @@ $role = $_SESSION['role'] ?? null;
         }
 
         @keyframes likeBeat {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* Comment Icon Animation */
@@ -442,10 +454,21 @@ $role = $_SESSION['role'] ?? null;
         }
 
         @keyframes commentBounce {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(5deg); }
-            75% { transform: rotate(-5deg); }
-            100% { transform: rotate(0deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(5deg);
+            }
+
+            75% {
+                transform: rotate(-5deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
         }
 
         /* Follow Icon Animation */
@@ -454,9 +477,17 @@ $role = $_SESSION['role'] ?? null;
         }
 
         @keyframes followPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* Badge Icon Animation */
@@ -465,9 +496,17 @@ $role = $_SESSION['role'] ?? null;
         }
 
         @keyframes badgeShine {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(15deg); }
-            100% { transform: rotate(0deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(15deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
         }
 
         /* Mention Icon Animation */
@@ -476,9 +515,17 @@ $role = $_SESSION['role'] ?? null;
         }
 
         @keyframes mentionSpin {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(180deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            50% {
+                transform: rotate(180deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Action Icon Animation */
@@ -487,44 +534,57 @@ $role = $_SESSION['role'] ?? null;
         }
 
         @keyframes actionWave {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(5deg); }
-            100% { transform: scale(1) rotate(0deg); }
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
         }
 
         /* Notification Icon Colors with better contrast and glow effect */
-        .notification-icon.like { 
-            color: #4CAF50; 
+        .notification-icon.like {
+            color: #4CAF50;
             background-color: rgba(76, 175, 80, 0.1);
             box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
             border: 2px solid #4CAF50;
         }
-        .notification-icon.comment { 
-            color: #2196F3; 
+
+        .notification-icon.comment {
+            color: #2196F3;
             background-color: rgba(33, 150, 243, 0.1);
             box-shadow: 0 0 10px rgba(33, 150, 243, 0.2);
             border: 2px solid #2196F3;
         }
-        .notification-icon.follow { 
-            color: #9C27B0; 
+
+        .notification-icon.follow {
+            color: #9C27B0;
             background-color: rgba(156, 39, 176, 0.1);
             box-shadow: 0 0 10px rgba(156, 39, 176, 0.2);
             border: 2px solid #9C27B0;
         }
-        .notification-icon.badge { 
-            color: #FFC107; 
+
+        .notification-icon.badge {
+            color: #FFC107;
             background-color: rgba(255, 193, 7, 0.1);
             box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
             border: 2px solid #FFC107;
         }
-        .notification-icon.mention { 
-            color: #E91E63; 
+
+        .notification-icon.mention {
+            color: #E91E63;
             background-color: rgba(233, 30, 99, 0.1);
             box-shadow: 0 0 10px rgba(233, 30, 99, 0.2);
             border: 2px solid #E91E63;
         }
-        .notification-icon.action { 
-            color: #00BCD4; 
+
+        .notification-icon.action {
+            color: #00BCD4;
             background-color: rgba(0, 188, 212, 0.1);
             box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
             border: 2px solid #00BCD4;
@@ -540,7 +600,7 @@ $role = $_SESSION['role'] ?? null;
             .notification-item-preview {
                 padding: 12px 12px 12px 35px;
             }
-            
+
             .notification-item-preview.unread::before {
                 width: 8px;
                 height: 8px;
@@ -550,14 +610,16 @@ $role = $_SESSION['role'] ?? null;
 
         /* Search Form Container */
         #search-form-folder {
-            margin-right: 2rem;  /* Add margin to create space between search and nav items */
+            margin-right: 2rem;
+            /* Add margin to create space between search and nav items */
         }
 
         /* Adjust navbar spacing */
         .navbar-nav {
             gap: 1rem;
             align-items: center;
-            margin-left: 1rem;  /* Add margin to create space after search bar */
+            margin-left: 1rem;
+            /* Add margin to create space after search bar */
         }
 
         /* Style for Post nav item */
@@ -641,22 +703,22 @@ $role = $_SESSION['role'] ?? null;
                 <div class="d-flex align-items-center">
                     <!-- Notifications -->
                     <div class="nav-item dropdown notifications-nav">
-                        <?php 
+                        <?php
                         // Get current page filename
                         $current_page = basename($_SERVER['PHP_SELF']);
                         // Only show dropdown functionality if not on notifications page
-                        if($current_page !== 'notifications.php'): 
-                        ?>
-                        <a class="nav-link" href="notifications.php">
-                            <i class="fas fa-bell"></i>
-                            <span class="badge badge-danger notification-badge">1</span>
-                        </a>
+                        if ($current_page !== 'notifications.php'):
+                            ?>
+                            <a class="nav-link" href="notifications.php">
+                                <i class="fas fa-bell"></i>
+                                <span class="badge badge-danger notification-badge">1</span>
+                            </a>
                         <?php else: ?>
-                        <!-- On notifications page, bell icon links directly to notifications page -->
-                        <a class="nav-link" href="notifications.php">
-                            <i class="fas fa-bell"></i>
-                            <span class="badge badge-danger notification-badge">1</span>
-                        </a>
+                            <!-- On notifications page, bell icon links directly to notifications page -->
+                            <a class="nav-link" href="notifications.php">
+                                <i class="fas fa-bell"></i>
+                                <span class="badge badge-danger notification-badge">1</span>
+                            </a>
                         <?php endif; ?>
                     </div>
 
@@ -787,48 +849,48 @@ $role = $_SESSION['role'] ?? null;
             });
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Enhanced notification badge update system
             function updateNotificationBadge() {
                 // Get accurate count from localStorage
                 const unreadCount = parseInt(localStorage.getItem('unreadNotifications') || '0');
-                
+
                 // Update all notification badges in the header
                 const badges = document.querySelectorAll('.notification-badge');
                 badges.forEach(badge => {
                     badge.textContent = unreadCount;
                     badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
                 });
-                
+
                 console.log('Header notification badge updated:', unreadCount);
             }
 
             // Initialize badges immediately
             updateNotificationBadge();
-            
+
             // Multiple sync methods for maximum reliability:
-            
+
             // 1. Listen for storage events (works across tabs/pages)
-            window.addEventListener('storage', function(e) {
+            window.addEventListener('storage', function (e) {
                 if (e.key === 'unreadNotifications') {
                     console.log('Notification storage updated:', e.newValue);
                     updateNotificationBadge();
                 }
             });
-            
+
             // 2. Listen for custom events from notifications.php
-            document.addEventListener('unreadNotificationsUpdated', function(e) {
+            document.addEventListener('unreadNotificationsUpdated', function (e) {
                 console.log('Notification update event received:', e.detail?.count);
                 updateNotificationBadge();
             });
-            
+
             // 3. Periodic check as a fallback (every 3 seconds)
             setInterval(updateNotificationBadge, 3000);
-            
+
             // 4. Update when notification icon is clicked
             const notificationLinks = document.querySelectorAll('.notifications-nav .nav-link');
             notificationLinks.forEach(link => {
-                link.addEventListener('click', function() {
+                link.addEventListener('click', function () {
                     // Small delay to ensure localStorage is updated first if needed
                     setTimeout(updateNotificationBadge, 100);
                 });

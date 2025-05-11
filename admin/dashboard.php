@@ -24,6 +24,25 @@ try {
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
 }
+
+$climateChangeCount = 0;
+$pollutionCount = 0;
+$biodiversityLossCount = 0;
+
+try {
+    $stmt = $conn->prepare("CALL GetPostCountsPerTopic()");
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result) {
+        $climateChangeCount = $result['Climate Change Posts'];
+        $pollutionCount = $result['Pollution Posts'];
+        $biodiversityLossCount = $result['Biodiversity Loss Posts'];
+    }
+    $stmt->closeCursor();
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
 ?>
 
 <!DOCTYPE html>
@@ -207,6 +226,8 @@ try {
             </div>
 
             <!-- Bottom Section: Posts by Category -->
+
+            <!-- Bottom Section: Posts by Category -->
             <hr>
             <div class="row">
                 <div class="col-12 text-left">
@@ -220,7 +241,9 @@ try {
                         <div class="card-body">
                             <div>
                                 <h5 class="card-title">Climate Change</h5>
-                                <h2 id="climateCount">0</h2>
+                                <h2 id="climateCount">
+                                    <?php echo $climateChangeCount; ?>
+                                </h2>
                             </div>
                             <div class="icon-container">
                                 <i class="fas fa-globe-americas fa-2x"></i>
@@ -234,7 +257,9 @@ try {
                         <div class="card-body">
                             <div>
                                 <h5 class="card-title">Pollution</h5>
-                                <h2 id="pollutionCount">0</h2>
+                                <h2 id="pollutionCount">
+                                    <?php echo $pollutionCount; ?>
+                                </h2>
                             </div>
                             <div class="icon-container">
                                 <i class="fas fa-trash-alt fa-2x"></i>
@@ -242,125 +267,109 @@ try {
                         </div>
                     </div>
                 </div>
-
-                <div class="col-md-4">
-                    <div class="card text-white bg-warning shadow p-3">
-                        <div class="card-body">
-                            <div>
-                                <h5 class="card-title">Biodiversity Loss</h5>
-                                <h2 id="biodiversityCount">0</h2>
-                            </div>
-                            <div class="icon-container">
-                                <i class="fas fa-tree fa-2x"></i>
-                            </div>
-                        </div>
+                <!-- Chart Section -->
+                <div class="chart-container mt-5">
+                    <h4 style="color:#fff;">Monthly User Engagement Trend</h4>
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <button class="btn btn-outline-light active" onclick="updateChart('monthly')">Monthly</button>
+                        <button class="btn btn-outline-light" onclick="updateChart('yearly')">Yearly</button>
+                        <button class="btn btn-outline-light" onclick="updateChart('weekly')">Weekly</button>
                     </div>
                 </div>
             </div>
-            <hr>
-            <!-- Chart Section -->
-            <div class="chart-container mt-5">
-                <h4 style="color:#fff;">Monthly User Engagement Trend</h4>
-                <canvas id="lineChart"></canvas>
-            </div>
-            <div class="d-flex justify-content-center mb-3">
-                <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                    <button class="btn btn-outline-light active" onclick="updateChart('monthly')">Monthly</button>
-                    <button class="btn btn-outline-light" onclick="updateChart('yearly')">Yearly</button>
-                    <button class="btn btn-outline-light" onclick="updateChart('weekly')">Weekly</button>
-                </div>
-            </div>
         </div>
-    </div>
 
-    <script>
-        // Sample values
-        const dashboardData = {
-            users: 1240,
-            admins: 12,
-            posts: {
-                climate: 198,
-                pollution: 132,
-                biodiversity: 89
-            }
-        };
+        <script>
+            // Sample values
+            const dashboardData = {
+                users: 1240,
+                admins: 12,
+                posts: {
+                    climate: 198,
+                    pollution: 132,
+                    biodiversity: 89
+                }
+            };
 
-        // Fill numbers
-        document.getElementById("climateCount").textContent = dashboardData.posts.climate;
-        document.getElementById("pollutionCount").textContent = dashboardData.posts.pollution;
-        document.getElementById("biodiversityCount").textContent = dashboardData.posts.biodiversity;
+            // Fill numbers
+            document.getElementById("climateCount").textContent = dashboardData.posts.climate;
+            document.getElementById("pollutionCount").textContent = dashboardData.posts.pollution;
+            document.getElementById("biodiversityCount").textContent = dashboardData.posts.biodiversity;
 
-        // Sample chart data
-        let lineChart;
+            // Sample chart data
+            let lineChart;
 
-        const chartDataSets = {
-            monthly: {
-                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                data: [50, 70, 65, 120, 150, 130, 180, 200, 220, 120, 200, 309]
-            },
-            yearly: {
-                labels: ["2020", "2021", "2022", "2023", "2024"],
-                data: [500, 820, 940, 1200, 1340]
-            },
-            weekly: {
-                labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-                data: [10, 12, 15, 9, 20, 25, 30]
-            }
-        };
-
-        function renderChart(type) {
-            const ctx = document.getElementById('lineChart').getContext('2d');
-            const { labels, data } = chartDataSets[type];
-
-            if (lineChart) lineChart.destroy(); // destroy previous instance
-
-            lineChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: `User Engagements (${type.charAt(0).toUpperCase() + type.slice(1)})`,
-                        data: data,
-                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                        borderColor: '#4caf50',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        pointBackgroundColor: '#fff'
-                    }]
+            const chartDataSets = {
+                monthly: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                    data: [50, 70, 65, 120, 150, 130, 180, 200, 220, 120, 200, 309]
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#fff'
+                yearly: {
+                    labels: ["2020", "2021", "2022", "2023", "2024"],
+                    data: [500, 820, 940, 1200, 1340]
+                },
+                weekly: {
+                    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+                    data: [10, 12, 15, 9, 20, 25, 30]
+                }
+            };
+
+            function renderChart(type) {
+                const ctx = document.getElementById('lineChart').getContext('2d');
+                const { labels, data } = chartDataSets[type];
+
+                if (lineChart) lineChart.destroy(); // destroy previous instance
+
+                lineChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `User Engagements (${type.charAt(0).toUpperCase() + type.slice(1)})`,
+                            data: data,
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            borderColor: '#4caf50',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointBackgroundColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#fff'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: '#fff' }
+                            },
+                            y: {
+                                ticks: { color: '#fff' },
+                                beginAtZero: true
                             }
                         }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { color: '#fff' }
-                        },
-                        y: {
-                            ticks: { color: '#fff' },
-                            beginAtZero: true
-                        }
                     }
-                }
-            });
-        }
+                });
+            }
 
-        function updateChart(type) {
-            renderChart(type);
-            // Highlight the selected button
-            document.querySelectorAll('.btn-group-toggle .btn').forEach(btn => btn.classList.remove('active'));
-            const clickedBtn = Array.from(document.querySelectorAll('.btn-group-toggle .btn')).find(btn => btn.textContent.toLowerCase() === type);
-            if (clickedBtn) clickedBtn.classList.add('active');
-        }
+            function updateChart(type) {
+                renderChart(type);
+                // Highlight the selected button
+                document.querySelectorAll('.btn-group-toggle .btn').forEach(btn => btn.classList.remove('active'));
+                const clickedBtn = Array.from(document.querySelectorAll('.btn-group-toggle .btn')).find(btn => btn.textContent.toLowerCase() === type);
+                if (clickedBtn) clickedBtn.classList.add('active');
+            }
 
-        // Initial render
-        renderChart('monthly');
-    </script>
+            // Initial render
+            renderChart('monthly');
+        </script>
 </body>
 
 </html>
